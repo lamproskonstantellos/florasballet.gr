@@ -30,7 +30,7 @@ function escapeHtml(s) {
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 // The fixed (article-independent) pages, in sitemap order.
-const STATIC_PATHS = ["/", "/i-scholi", "/didaskontes", "/diagonismoi", "/nea"];
+const STATIC_PATHS = ["/", "/i-scholi", "/didaskontes", "/diagonismoi", "/nea", "/epikoinonia"];
 
 // sitemap.xml — the static pages, then one <url> per article in folder order.
 // The index pages share the most-recent article date as their lastmod so the

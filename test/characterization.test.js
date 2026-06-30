@@ -40,6 +40,7 @@ test("status codes per route", async () => {
     ["/didaskontes", 200],
     ["/diagonismoi", 200],
     ["/nea", 200],
+    ["/epikoinonia", 200],
     ["/nea/enarxi-eggrafon-2026-2027", 200],
     ["/nea/does-not-exist", 404],
     ["/totally-unknown", 404],
@@ -61,6 +62,7 @@ test("title per route", async () => {
   assert.equal(titleOf((await request(base, "/didaskontes")).body), "Διδάσκοντες – Σχολή Μπαλέτου Φλώρας Μουστάκη");
   assert.equal(titleOf((await request(base, "/diagonismoi")).body), "Διαγωνισμοί – Σχολή Μπαλέτου Φλώρας Μουστάκη");
   assert.equal(titleOf((await request(base, "/nea")).body), "Νέα &amp; Ανακοινώσεις – Σχολή Μπαλέτου Φλώρας Μουστάκη");
+  assert.equal(titleOf((await request(base, "/epikoinonia")).body), "Επικοινωνία – Σχολή Μπαλέτου Φλώρας Μουστάκη");
 });
 
 // ---- Feeds (deterministic) --------------------------------------------------

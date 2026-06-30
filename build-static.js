@@ -49,6 +49,7 @@ const STATIC_HTML_ROUTES = [
   { pathname: "/didaskontes", out: "didaskontes/index.html" },
   { pathname: "/diagonismoi", out: "diagonismoi/index.html" },
   { pathname: "/nea", out: "nea/index.html" },
+  { pathname: "/epikoinonia", out: "epikoinonia/index.html" },
 ];
 
 // Public root files copied verbatim (the dual modules + stylesheet + manifest).

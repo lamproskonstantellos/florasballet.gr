@@ -23,7 +23,7 @@ after(async () => { await stop(); });
 
 test("parseRoute, computePageMeta and isValidSpaRoute agree on a corpus", () => {
   const corpus = [
-    "/", "/i-scholi", "/didaskontes", "/diagonismoi", "/nea",
+    "/", "/i-scholi", "/didaskontes", "/diagonismoi", "/nea", "/epikoinonia",
     "/nea/enarxi-eggrafon-2026-2027",
     "/nea/unknown-slug-xyz",
     "/random", "/nea/", "/diagonismoi/", "/nea/a/b",
@@ -37,7 +37,7 @@ test("parseRoute, computePageMeta and isValidSpaRoute agree on a corpus", () => 
       assert.equal(meta.ogType, "website");
       assert.equal(meta.title, SITE.name, `${p}: home title`);
       assert.equal(valid, true, `${p}: home valid`);
-    } else if (["school", "teachers", "competitions", "news-list"].includes(r.page)) {
+    } else if (["school", "teachers", "competitions", "news-list", "contact"].includes(r.page)) {
       assert.equal(meta.ogType, "website", p);
       assert.equal(valid, true, p);
     } else if (r.page === "article") {
