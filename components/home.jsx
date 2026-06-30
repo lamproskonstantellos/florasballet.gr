@@ -112,11 +112,10 @@ function Contact() {
       <div className="contact-shell">
         <div className="contact-info">
           <ContactInfoRow icon={Icon.phone} label="Τηλέφωνα">
-            {SITE.phones.map((p, i) => (
-              <React.Fragment key={p.tel}>
-                {i > 0 ? " · " : null}
+            {SITE.phones.map((p) => (
+              <div className="contact-line" key={p.tel}>
                 <a href={`tel:${p.tel}`}>{p.display}</a>
-              </React.Fragment>
+              </div>
             ))}
           </ContactInfoRow>
 
@@ -126,7 +125,10 @@ function Contact() {
 
           <ContactInfoRow icon={Icon.clock} label="Ώρες λειτουργίας">
             {SITE.hours.map((h) => (
-              <div key={h.label}>{h.label} · {h.time}</div>
+              <div className="hours-line" key={h.label}>
+                <span className="day">{h.label}</span>
+                <span className="time">{h.time}</span>
+              </div>
             ))}
           </ContactInfoRow>
 
