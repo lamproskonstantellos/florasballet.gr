@@ -7,7 +7,7 @@
 
 const { useState, useEffect, useCallback, useRef } = React;
 
-const HEADER_OFFSET = 92;
+const HEADER_OFFSET = 100;
 
 /* ============================================================
    HEADER — sticky, translucent, with the «Η Σχολή» dropdown and
@@ -92,7 +92,7 @@ function Header({ route, navigate, activeSection }) {
           aria-label={`${SITE.name}, Αρχική`}
           onClick={(e) => go(e, { page: "home" })}
         >
-          <img className="brand-logo" src={SITE.logoNav} alt={SITE.name} width="244" height="120" />
+          <img className="brand-logo" src={SITE.logoNav} alt={SITE.name} width="550" height="270" />
         </a>
 
         {/* Desktop nav */}
@@ -186,7 +186,7 @@ function Header({ route, navigate, activeSection }) {
           <div className="mobile-backdrop" onClick={() => setMobileOpen(false)} />
           <div className="mobile-menu" ref={mobileRef} role="dialog" aria-modal="true" aria-label="Μενού">
             <div className="mobile-menu-head">
-              <img src={SITE.logoNav} alt={SITE.name} width="244" height="120" />
+              <img src={SITE.logoNav} alt={SITE.name} width="550" height="270" />
               <button
                 type="button"
                 className="mobile-close"

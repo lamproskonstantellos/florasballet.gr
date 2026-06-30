@@ -13,19 +13,20 @@
 function HomeIntro() {
   return (
     <div className="home-intro">
-      <p className="home-eyebrow">40 χρόνια · ρυθμός, κίνηση &amp; αγάπη για τον χορό</p>
+      <p className="home-eyebrow">40 χρόνια — ρυθμός, κίνηση &amp; αγάπη για τον χορό</p>
       <h1>{SCHOOL.h1}</h1>
       <p className="sub">{SCHOOL.h1Sub}</p>
     </div>
   );
 }
 
-// One upright + one wide frame, so the pair mixes orientations instead of
-// reading as identical tiles. (misc-2 is the black-and-white shot, now reused
-// as the news article cover, so it is intentionally dropped here.)
+// Two wide frames stacked one above the other — both keep their natural
+// landscape framing (no tall vertical crop that would lose the scene).
+// (misc-2 is the black-and-white shot, now reused as the news article cover,
+// so it is intentionally dropped here.)
 const WHYUS_PHOTOS = [
-  { src: "/images/misc/misc-1.jpg", cls: "portrait", w: 600, h: 800 },
-  { src: "/images/misc/misc-3.jpg", cls: "landscape", w: 800, h: 600 },
+  { src: "/images/misc/misc-1.jpg", w: 800, h: 533 },
+  { src: "/images/misc/misc-3.jpg", w: 800, h: 533 },
 ];
 
 function WhyUs() {
@@ -50,7 +51,7 @@ function WhyUs() {
         <div className="whyus-photos">
           {WHYUS_PHOTOS.map((ph, i) => (
             <div
-              className={`whyus-photo ${ph.cls} reveal ${visible.has(`whyph-${i}`) ? "in" : ""}`}
+              className={`whyus-photo reveal ${visible.has(`whyph-${i}`) ? "in" : ""}`}
               data-reveal={`whyph-${i}`}
               style={{ transitionDelay: `${i * 90}ms` }}
               key={i}

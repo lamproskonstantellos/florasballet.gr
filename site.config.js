@@ -50,7 +50,9 @@ const SITE = {
     "Αναγνωρισμένη από το κράτος σχολή μπαλέτου στο Μενίδι (Αχαρνές) από το 1986. Κλασικό μπαλέτο, σύγχρονος χορός, μουσικοκινητική αγωγή και μοντέρνο/hip hop, για όλες τις ηλικίες.",
 
   // Brand logos (40th-anniversary variants are the ones in use this year).
-  logoNav: "/brand/logo-anniversary-nav.png",
+  // The nav/menu use the full-resolution mark (550×270) so it stays crisp on
+  // high-DPI screens; the small 244×120 "-nav" copy looked soft when enlarged.
+  logoNav: "/brand/logo-anniversary.png",
   logoAnniversary: "/brand/logo-anniversary.png",
   logoOnWhite: "/brand/logo-anniversary-on-white.png",
 
