@@ -115,7 +115,7 @@ h1, h2, h3, h4 { font-family: var(--font-serif); }
   line-height: 0;
 }
 .brand-logo {
-  height: 46px;
+  height: 58px;
   width: auto;
   display: block;
 }
@@ -1342,7 +1342,7 @@ section.block:first-of-type { border-top: none; }
   .whyus-photos { grid-template-columns: 1fr 1fr; }
   .carousel-viewport { aspect-ratio: 4 / 5; }
   .site-footer-inner { grid-template-columns: 1fr; gap: 28px; }
-  .brand-logo { height: 40px; }
+  .brand-logo { height: 48px; }
   .carousel-arrow { width: 40px; height: 40px; }
 }
 
