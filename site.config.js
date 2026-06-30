@@ -45,6 +45,10 @@ const SITE = {
   // No-API-key Google Maps embed pinned to the exact studio coordinates.
   mapEmbed: "https://www.google.com/maps?q=38.078951,23.738587&hl=el&z=16&output=embed",
 
+  // Shareable Google Maps link for the studio, opened when the address in the
+  // contact section and the footer is clicked.
+  mapsLink: "https://maps.app.goo.gl/4gSrcz1BEEg4bNbP9",
+
   defaultImage: "/og-image.jpg",
   defaultDescription:
     "Αναγνωρισμένη από το κράτος σχολή μπαλέτου στο Μενίδι (Αχαρνές) από το 1986. Κλασικό μπαλέτο, σύγχρονος χορός, μουσικοκινητική αγωγή και μοντέρνο/hip hop, για όλες τις ηλικίες.",

@@ -137,7 +137,9 @@ function Contact() {
           </ContactInfoRow>
 
           <ContactInfoRow icon={Icon.pin} label="Διεύθυνση">
-            {SITE.address.street}, {SITE.address.postalCode} {SITE.address.area}
+            <a href={SITE.mapsLink} target="_blank" rel="noopener noreferrer">
+              {SITE.address.street}, {SITE.address.postalCode} {SITE.address.area}
+            </a>
           </ContactInfoRow>
 
           <div className="contact-social">

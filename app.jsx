@@ -237,7 +237,11 @@ function Footer() {
 
         <div className="footer-col">
           <h4>Επικοινωνία</h4>
-          <p>{SITE.address.street}<br />{SITE.address.postalCode} {SITE.address.area}</p>
+          <p>
+            <a href={SITE.mapsLink} target="_blank" rel="noopener noreferrer">
+              {SITE.address.street}<br />{SITE.address.postalCode} {SITE.address.area}
+            </a>
+          </p>
           {SITE.phones.map((p) => (
             <a key={p.tel} href={`tel:${p.tel}`}>{p.display}</a>
           ))}
