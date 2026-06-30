@@ -1,0 +1,79 @@
+Copyright (c) 2026 Σχολή Μπαλέτου Φλώρας Μουστάκη (Flora Moustaki).
+Website design and source code copyright (c) 2026 Lampros Konstantellos.
+All rights reserved.
+
+This repository contains the source code, written content, design, images,
+logos, and configuration files for the website published at
+https://florasballet.gr (the "Work"), excluding the third-party components
+identified below, which remain governed by their own licenses.
+
+PROPRIETARY RIGHTS
+
+The website's source code and design are the work and proprietary
+intellectual property of Lampros Konstantellos, developed for Σχολή
+Μπαλέτου Φλώρας Μουστάκη. The written content, logos, and brand of the Work
+are the proprietary intellectual property of Σχολή Μπαλέτου Φλώρας Μουστάκη
+(Flora Moustaki).
+
+No part of this material may be copied, reproduced, modified, adapted,
+translated, distributed, republished, mirrored, displayed, sublicensed,
+sold, or used to create derivative works, in whole or in part, in any form
+or by any means, without the prior written permission of the respective
+copyright holder.
+
+The repository is made publicly visible solely to support the building and
+deployment of the website. Public visibility on GitHub or any other
+platform does not, and shall not be construed to, grant any license, right,
+title, or interest in or to the Work.
+
+PHOTOGRAPHS AND IMAGES
+
+The photographs and images in this repository depict the school, its
+teachers, students, classes, and performances. Some were taken by
+third-party photographers (for example at recitals, competitions, and
+events); these are used by Σχολή Μπαλέτου Φλώρας Μουστάκη with the consent
+and permission of the photographers and of the persons depicted (or their
+guardians). All rights in the photographs and images are reserved to
+Σχολή Μπαλέτου Φλώρας Μουστάκη and, where applicable, to the respective
+photographers and persons depicted.
+
+A number of the images depict minors. The photographs and images may not be
+copied, reproduced, redistributed, or reused in any context, on GitHub or
+elsewhere, without the prior written permission of the copyright holder.
+Public visibility of any image grants no such license.
+
+THIRD-PARTY COMPONENTS
+
+The terms above apply only to material owned by the copyright holders. This
+repository also redistributes third-party software under its own license,
+which governs that material and is not superseded by this notice:
+
+  - vendor/react.production.min.js and vendor/react-dom.production.min.js
+    React and ReactDOM, Copyright (c) Facebook, Inc. and its affiliates,
+    licensed under the MIT License. The original license headers are
+    retained in those files and govern their use.
+
+Fonts (Cormorant Garamond, Inter) are loaded at runtime from the Google
+Fonts CDN under the SIL Open Font License and are not redistributed in this
+repository.
+
+The Facebook and Instagram names and logos, reproduced as SVG icons in
+icons.jsx, are trademarks of their respective owners and are used solely to
+identify and link to the school's social-media profiles. No ownership of,
+or affiliation with, those marks is claimed.
+
+PERMISSION REQUESTS
+
+Permission requests concerning the school's content, logos, or images
+should be directed to Σχολή Μπαλέτου Φλώρας Μουστάκη at info@florasballet.gr
+or +30 210 2468962. Requests concerning the website's source code or design
+should be directed to Lampros Konstantellos.
+
+NO WARRANTY
+
+THE WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF,
+OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS IN THE WORK.

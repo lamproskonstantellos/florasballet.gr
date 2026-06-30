@@ -1,0 +1,30 @@
+{
+  "name": "Σχολή Μπαλέτου Φλώρας Μουστάκη",
+  "short_name": "Flora's Ballet",
+  "description": "Πρότυπη σχολή μπαλέτου στο Μενίδι (Αχαρνές), αναγνωρισμένη από το κράτος από το 1986.",
+  "lang": "el",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#FBEAEF",
+  "theme_color": "#43232F",
+  "icons": [
+    {
+      "src": "/favicon/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon/favicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

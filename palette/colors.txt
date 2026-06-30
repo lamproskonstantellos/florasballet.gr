@@ -1,0 +1,8 @@
+Flora's Ballet — Colour palette
+
+Plum / Μπορντό   #43232F   rgb(67, 35, 47)
+Rose             #C77E92   rgb(199, 126, 146)
+Soft pink        #E7A6B7   rgb(231, 166, 183)
+Cream            #FBEAEF   rgb(251, 234, 239)
+Greige           #A1908C   rgb(161, 144, 140)
+Hairline         #E6D6DA   rgb(230, 214, 218)

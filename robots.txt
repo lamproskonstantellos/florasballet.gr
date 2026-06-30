@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://florasballet.gr/sitemap.xml

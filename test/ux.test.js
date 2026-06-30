@@ -1,0 +1,188 @@
+"use strict";
+
+// SPA behaviour & UX: titles are driven by the shared pageTitle so the client
+// (document.title) and the server (injected <title>) can never diverge. Client
+// wiring (no DOM in tests) is asserted against the source and the compiled
+// bundle.
+
+const { test } = require("node:test");
+const assert = require("node:assert");
+const fs = require("node:fs");
+const path = require("node:path");
+const routes = require("../routes.js");
+const server = require("../server.js");
+const SITE = require("../site.config.js");
+
+const ROOT = path.join(__dirname, "..");
+const ctx = { siteName: SITE.name, tagline: SITE.tagline };
+const ARTICLE = "enarxi-eggrafon-2026-2027";
+
+// ---- pageTitle (shared source of truth) ------------------------------------
+
+function pageTitleFor(route) { return routes.pageTitle(route, ctx); }
+
+test("pageTitle covers every route", () => {
+  assert.equal(pageTitleFor({ page: "home" }), SITE.name);
+  assert.equal(pageTitleFor({ page: "school" }), `Η Σχολή – ${SITE.name}`);
+  assert.equal(pageTitleFor({ page: "teachers" }), `Διδάσκοντες – ${SITE.name}`);
+  assert.equal(pageTitleFor({ page: "competitions" }), `Διαγωνισμοί – ${SITE.name}`);
+  assert.equal(pageTitleFor({ page: "news-list" }), `Νέα & Ανακοινώσεις – ${SITE.name}`);
+  assert.equal(
+    routes.pageTitle({ page: "article" }, { ...ctx, articleTitle: "Άρθρο" }),
+    `Άρθρο – ${SITE.name}`
+  );
+  assert.match(pageTitleFor({ page: "article" }), /^Η σελίδα δεν βρέθηκε/); // unknown slug
+  assert.match(pageTitleFor({ page: "not-found" }), /^Η σελίδα δεν βρέθηκε/);
+});
+
+// ---- client and server titles agree (no divergence) ------------------------
+
+test("server-injected title equals pageTitle(parseRoute(path)) for every route", () => {
+  const cases = ["/", "/i-scholi", "/didaskontes", "/diagonismoi", "/nea", `/nea/${ARTICLE}`, "/no-such-route"];
+  for (const p of cases) {
+    const route = routes.parseRoute(p);
+    const articleTitle =
+      route.page === "article" ? (server.loadArticleMeta(route.slug) || {}).title : undefined;
+    const expected = routes.pageTitle(route, { ...ctx, articleTitle });
+    assert.equal(server.computePageMeta(p).title, expected, `title drift at ${p}`);
+  }
+});
+
+// ---- client wiring: document.title + focus on route change -----------------
+
+test("app.jsx updates document.title from pageTitle on route change", () => {
+  const src = fs.readFileSync(path.join(ROOT, "app.jsx"), "utf8");
+  assert.ok(/document\.title\s*=\s*pageTitle\(/.test(src), "navigate/effect must set document.title via pageTitle");
+});
+
+test("app.jsx moves focus to main on route change (a11y)", () => {
+  const src = fs.readFileSync(path.join(ROOT, "app.jsx"), "utf8");
+  assert.ok(src.includes('tabIndex={-1}'), "main must be programmatically focusable");
+  assert.ok(/mainRef\.current\.focus\(/.test(src), "route change should focus main");
+});
+
+function compiledBundle(entryPoint) {
+  const manifest = require("../dist/manifest.json");
+  const out = Object.entries(manifest.outputs).find(([, v]) => v.entryPoint === entryPoint)[0];
+  return fs.readFileSync(path.join(ROOT, out), "utf8");
+}
+
+test("compiled app bundle carries the title + focus wiring", () => {
+  const code = compiledBundle("app.jsx");
+  assert.ok(code.includes("document.title"), "bundle missing document.title");
+  assert.ok(code.includes("pageTitle"), "bundle missing pageTitle");
+});
+
+// ---- Header: dropdown + mobile menu -----------------------------------------
+
+test("Header wires the «Η Σχολή» dropdown and the mobile menu (a11y attrs)", () => {
+  const src = fs.readFileSync(path.join(ROOT, "app.jsx"), "utf8");
+  assert.ok(src.includes("nav-dropdown"), "desktop dropdown missing");
+  assert.match(src, /aria-haspopup="true"/, "dropdown needs aria-haspopup");
+  assert.match(src, /aria-expanded=\{dropdownOpen/, "dropdown needs aria-expanded");
+  assert.ok(src.includes("nav-toggle"), "hamburger toggle missing");
+  assert.ok(src.includes("mobile-menu"), "mobile panel missing");
+  assert.match(src, /role="dialog"[\s\S]{0,40}aria-modal="true"/, "mobile panel must be a modal dialog");
+  assert.ok(src.includes('document.body.style.overflow = "hidden"'), "mobile menu must lock scroll");
+});
+
+// ---- Contact / Footer brand icons -------------------------------------------
+
+test("icons bundle defines the Facebook and Instagram glyphs", () => {
+  const code = compiledBundle("icons.jsx");
+  assert.ok(code.includes("facebook"), "Icon.facebook missing");
+  assert.ok(code.includes("instagram"), "Icon.instagram missing");
+});
+
+// ---- Homepage scroll-spy nav -------------------------------------------------
+
+test("App observes the home sections and drives the Header via activeSection", () => {
+  const src = fs.readFileSync(path.join(ROOT, "app.jsx"), "utf8");
+  assert.match(src, /rootMargin:\s*"-15% 0px -80% 0px"/, "near-top band rootMargin missing");
+  assert.ok(src.includes("pickActiveSection("), "App must resolve the section via pickActiveSection");
+  assert.match(src, /\["giati-emas",\s*"mathimata",\s*"nea",\s*"epikoinonia"\]/, "section order missing");
+  assert.ok(src.includes("activeSection={activeSection}"), "Header must receive activeSection");
+  assert.match(src, /activeSection === "mathimata"/, "home nav highlight must follow the scroll-spy");
+  assert.ok(src.includes("io.disconnect()"), "observer must be disconnected on leave");
+});
+
+test("compiled app bundle carries the scroll-spy wiring", () => {
+  const code = compiledBundle("app.jsx");
+  assert.ok(code.includes("IntersectionObserver"), "bundle missing the observer");
+  assert.ok(code.includes("pickActiveSection"), "bundle must call the shared helper");
+  assert.ok(code.includes("-15% 0px -80% 0px"), "bundle missing the band rootMargin");
+});
+
+// ---- Article share row -------------------------------------------------------
+
+test("Article wires the share row above the sources block, URL from config", () => {
+  const src = fs.readFileSync(path.join(ROOT, "components/news.jsx"), "utf8");
+  assert.ok(
+    src.includes('SITE.url + "/nea/" + article.slug'),
+    "share URL must be canonical (from config), not window.location"
+  );
+  assert.ok(src.includes("shareLinks(url).facebook"), "Facebook href must come from shareLinks");
+  assert.match(src, /aria-label="Κοινοποίηση στο Facebook"/);
+  assert.match(src, /target="_blank"[\s\S]{0,40}rel="noopener noreferrer"/);
+  const shareAt = src.indexOf("<ArticleShare article={article} />");
+  const sourcesAt = src.indexOf("article.sources && article.sources.length > 0 &&");
+  assert.ok(shareAt !== -1, "Article must render ArticleShare");
+  assert.ok(sourcesAt !== -1 && shareAt < sourcesAt, "share row must sit above the sources block");
+});
+
+test("copy-link uses the clipboard API with an execCommand fallback and a live announcement", () => {
+  const src = fs.readFileSync(path.join(ROOT, "components/news.jsx"), "utf8");
+  assert.ok(src.includes("navigator.clipboard.writeText(url)"), "missing clipboard copy");
+  assert.ok(src.includes('document.execCommand("copy")'), "missing legacy clipboard fallback");
+  assert.match(src, /aria-live="polite"/, "copied state must be announced");
+  assert.ok(src.includes("clearTimeout(copyTimer.current)"), "copied-state timer must be cleared on unmount");
+});
+
+test("compiled news bundle carries the share row + copy handler", () => {
+  const code = compiledBundle("components/news.jsx");
+  assert.ok(code.includes("article-share"), "share row class missing from bundle");
+  assert.ok(code.includes("shareLinks"), "bundle must call the shared shareLinks helper");
+  assert.ok(code.includes("writeText"), "bundle missing clipboard copy");
+  assert.ok(code.includes("execCommand"), "bundle missing clipboard fallback");
+  assert.ok(code.includes("aria-live"), "bundle missing the copied announcement");
+});
+
+// ---- NotFound page -----------------------------------------------------------
+
+test("NotFound offers routes onward: home, /nea, contact", () => {
+  const src = fs.readFileSync(path.join(ROOT, "app.jsx"), "utf8");
+  const notFound = src.slice(src.indexOf("function NotFound"), src.indexOf("function App"));
+  assert.match(notFound, /href="\/"/, "missing back-to-home link");
+  assert.match(notFound, /href="\/nea"/, "missing /nea link");
+  assert.match(notFound, /href="\/#epikoinonia"/, "missing contact link");
+  assert.ok(notFound.includes("handleAnchorClick"), "links must go through SPA navigation");
+  assert.ok(!notFound.includes("style={{"), "404 styling lives in styles.css, not inline");
+});
+
+test("compiled app bundle carries the redesigned 404", () => {
+  const code = compiledBundle("app.jsx");
+  assert.ok(code.includes("notfound"), "bundle missing the .notfound classes");
+  assert.ok(code.includes("Η σελίδα δεν βρέθηκε"), "bundle missing the 404 headline");
+});
+
+// ---- View-all threshold is exactly "more than the cap" ---------------------
+
+test("news preview cap: View-all appears only when items exceed the limit", () => {
+  const schema = require("../article-schema.js");
+  const window = {
+    SITE,
+    validateArticle: schema.validateArticle,
+    compareByDateDesc: schema.compareByDateDesc,
+  };
+  const code = fs.readFileSync(path.join(ROOT, "data.js"), "utf8");
+  // eslint-disable-next-line no-new-func
+  new Function("window", code)(window);
+  window.NEWS_ARTICLES = [];
+  const cap = window.LIMITS.newsPreview;
+  const mk = (i) => ({ slug: "s" + i, date: "2026-01-0" + (i + 1) });
+  for (let i = 0; i < cap; i++) window.NEWS_ARTICLES.push(mk(i));
+  assert.equal(window.getRecentNews().length > cap, false, "exactly cap → no View-all");
+  window.NEWS_ARTICLES.push(mk(cap));
+  assert.equal(window.getRecentNews().length > cap, true, "cap+1 → View-all");
+  assert.equal(window.getRecentNews(cap).length, cap, "preview is sliced to the cap");
+});

@@ -1,0 +1,17 @@
+node_modules/
+dist/
+build/
+scratch/
+.DS_Store
+Thumbs.db
+verification-report.md
+*.webp
+*.avif
+trash/
+archive/
+
+# Draft / scratch news folders (underscore- or dot-prefixed). A real article
+# slug can only be [a-z0-9-]+, so these are never shippable articles — they are
+# ignored by discoverArticleSlugs and must never be committed.
+news/_*/
+news/.*/
