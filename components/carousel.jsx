@@ -87,25 +87,7 @@ function Carousel() {
         <div className="carousel-scrim" aria-hidden="true" />
 
         {count > 1 && (
-          <>
-            <button
-              type="button"
-              className="carousel-arrow prev"
-              aria-label="Προηγούμενη διαφάνεια"
-              onClick={prev}
-            >
-              <Icon.arrowLeft style={{ width: 18, height: 18 }} />
-            </button>
-            <button
-              type="button"
-              className="carousel-arrow next"
-              aria-label="Επόμενη διαφάνεια"
-              onClick={next}
-            >
-              <Icon.arrowRight style={{ width: 18, height: 18 }} />
-            </button>
-
-            <div className="carousel-dots" role="tablist" aria-label="Επιλογή διαφάνειας">
+          <div className="carousel-dots" role="tablist" aria-label="Επιλογή διαφάνειας">
               {slides.map((_, i) => (
                 <button
                   key={i}
@@ -117,8 +99,7 @@ function Carousel() {
                   onClick={() => goTo(i)}
                 />
               ))}
-            </div>
-          </>
+          </div>
         )}
       </div>
     </section>

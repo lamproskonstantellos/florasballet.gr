@@ -119,7 +119,7 @@ h1, h2, h3, h4 { font-family: var(--font-serif); }
   line-height: 0;
 }
 .brand-logo {
-  height: 70px;
+  height: 80px;
   width: auto;
   display: block;
 }
@@ -272,7 +272,7 @@ h1, h2, h3, h4 { font-family: var(--font-serif); }
   padding-bottom: 14px;
   border-bottom: 1px solid var(--line);
 }
-.mobile-menu-head img { height: 52px; width: auto; }
+.mobile-menu-head img { height: 60px; width: auto; }
 .mobile-close {
   width: 42px; height: 42px;
   display: inline-flex;
@@ -457,32 +457,6 @@ section.block:first-of-type { border-top: none; }
     linear-gradient(0deg, rgba(67, 35, 47, 0.62) 0%, rgba(67, 35, 47, 0.10) 38%, rgba(67, 35, 47, 0) 60%);
   z-index: 2;
 }
-.carousel-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 4;
-  width: 46px;
-  height: 46px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  background: rgba(67, 35, 47, 0.28);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 50%;
-  backdrop-filter: blur(4px);
-  transition: background var(--transition), transform var(--transition);
-}
-.carousel-arrow:hover { background: rgba(67, 35, 47, 0.5); }
-.carousel-arrow.prev { left: 18px; }
-.carousel-arrow.next { right: 18px; }
-.carousel-arrow.prev:hover { transform: translateY(-50%) translateX(-2px); }
-.carousel-arrow.next:hover { transform: translateY(-50%) translateX(2px); }
-/* On touch devices, swipe + dots are enough; the arrows only overlap the photo. */
-@media (hover: none) {
-  .carousel-arrow { display: none; }
-}
 .carousel-dots {
   position: absolute;
   z-index: 4;
@@ -587,22 +561,19 @@ section.block:first-of-type { border-top: none; }
 .whyus-photos {
   position: relative;
   display: grid;
-  grid-template-columns: 0.82fr 1.18fr; /* upright frame narrow, wide frame broad */
+  grid-template-columns: 1fr;   /* two wide frames, one below the other */
   gap: 18px;
-  align-items: end; /* bottoms align; the taller portrait staggers up for an editorial feel */
+  align-content: center;
 }
 .whyus-photo {
   border-radius: var(--radius-md);
   overflow: hidden;
   box-shadow: var(--shadow-md);
   background: var(--cream);
+  aspect-ratio: 3 / 2;          /* landscape — keeps the full scene, no tall crop */
 }
 .whyus-photo img { width: 100%; height: 100%; object-fit: cover; transition: transform 700ms cubic-bezier(.2,.7,.2,1); }
 .whyus-photo:hover img { transform: scale(1.05); }
-.whyus-photo.portrait { aspect-ratio: 3 / 4; }
-/* This shot is a cropped landscape; frame it on the foreground skirts. */
-.whyus-photo.portrait img { object-position: 70% center; }
-.whyus-photo.landscape { aspect-ratio: 3 / 2; }
 
 /* ===== «Τα μαθήματα» ===== */
 .courses-grid {
@@ -888,7 +859,7 @@ section.block:first-of-type { border-top: none; }
   aspect-ratio: 1072 / 1500;
   background: var(--cream);
   position: sticky;
-  top: 108px;
+  top: 116px;
 }
 .teacher-photo img { width: 100%; height: 100%; object-fit: cover; }
 .teacher-name {
@@ -979,7 +950,7 @@ section.block:first-of-type { border-top: none; }
   color: var(--accent);
   line-height: 1;
   position: sticky;
-  top: 108px;
+  top: 116px;
   align-self: start;
 }
 .comp-events { display: flex; flex-direction: column; gap: 24px; }
@@ -1380,10 +1351,9 @@ section.block:first-of-type { border-top: none; }
 @media (max-width: 560px) {
   .courses-grid { grid-template-columns: 1fr; }
   .course-card { aspect-ratio: 16 / 11; }
-  .carousel-viewport { aspect-ratio: 4 / 5; }
+  .carousel-viewport { aspect-ratio: 1 / 1; }
   .site-footer-inner { grid-template-columns: 1fr; gap: 28px; }
-  .brand-logo { height: 56px; }
-  .carousel-arrow { width: 40px; height: 40px; }
+  .brand-logo { height: 64px; }
 }
 
 /* ===== Reduced motion ===== */
