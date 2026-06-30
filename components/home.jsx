@@ -13,7 +13,7 @@
 function HomeIntro() {
   return (
     <div className="home-intro">
-      <p className="home-eyebrow">40 χρόνια — ρυθμός, κίνηση &amp; αγάπη για τον χορό</p>
+      <p className="home-eyebrow">40 χρόνια ρυθμός, κίνηση &amp; αγάπη για τον χορό</p>
       <h1>{SCHOOL.h1}</h1>
       <p className="sub">{SCHOOL.h1Sub}</p>
     </div>
