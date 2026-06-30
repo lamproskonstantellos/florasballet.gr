@@ -910,6 +910,9 @@ section.block:first-of-type { border-top: none; }
   color: var(--ink-soft);
   margin: 0 0 16px;
 }
+@media (min-width: 720px) {
+  .teacher-bio p { text-align: justify; text-justify: inter-word; hyphens: auto; -webkit-hyphens: auto; }
+}
 .teacher-highlights {
   margin-top: 26px;
   padding-top: 24px;
@@ -953,6 +956,9 @@ section.block:first-of-type { border-top: none; }
   color: var(--muted);
   max-width: 660px;
   margin: 0 0 44px;
+}
+@media (min-width: 720px) {
+  .comp-intro { text-align: justify; text-justify: inter-word; }
 }
 .comp-year {
   display: grid;
