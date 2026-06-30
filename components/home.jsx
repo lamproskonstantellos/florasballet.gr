@@ -112,7 +112,7 @@ function Contact() {
   const [fb, ig] = SITE.socialLinks;
   return (
     <section className="block" id="epikoinonia">
-      <SectionHeader center kicker="Ελάτε να χορέψουμε" title="Επικοινωνία" />
+      <SectionHeader center as="h1" kicker="Ελάτε να χορέψουμε" title="Επικοινωνία" />
       <div className="contact-shell">
         <div className="contact-info">
           <ContactInfoRow icon={Icon.phone} label="Τηλέφωνα">

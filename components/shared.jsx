@@ -58,12 +58,16 @@ function useReveal() {
   return visible;
 }
 
-function SectionHeader({ kicker, title, action, center }) {
+function SectionHeader({ kicker, title, action, center, as }) {
+  // `as` lets a section heading render as the page's single <h1> (e.g. the
+  // standalone /epikoinonia page, whose only heading is this section's title).
+  // Defaults to <h2> for the home-page sections that sit under the home <h1>.
+  const Heading = as || "h2";
   return (
     <div className={"section-label" + (center ? " section-center" : "")}>
       <div className="section-label-text">
         {kicker ? <span className="section-kicker">{kicker}</span> : null}
-        <h2>{title}</h2>
+        <Heading>{title}</Heading>
       </div>
       {action ? <div className="section-label-action">{action}</div> : null}
     </div>
