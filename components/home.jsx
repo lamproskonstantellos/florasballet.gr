@@ -19,10 +19,12 @@ function HomeIntro() {
   );
 }
 
+// One upright + one wide frame, so the pair mixes orientations instead of
+// reading as identical tiles. (misc-2 is the black-and-white shot, now reused
+// as the news article cover, so it is intentionally dropped here.)
 const WHYUS_PHOTOS = [
-  { src: "/images/misc/misc-1.jpg", cls: "tall" },
-  { src: "/images/misc/misc-2.jpg", cls: "" },
-  { src: "/images/misc/misc-3.jpg", cls: "" },
+  { src: "/images/misc/misc-1.jpg", cls: "portrait", w: 600, h: 800 },
+  { src: "/images/misc/misc-3.jpg", cls: "landscape", w: 800, h: 600 },
 ];
 
 function WhyUs() {
@@ -52,7 +54,7 @@ function WhyUs() {
               style={{ transitionDelay: `${i * 90}ms` }}
               key={i}
             >
-              <Picture src={ph.src} alt="" width="640" height="853" />
+              <Picture src={ph.src} alt="" width={ph.w} height={ph.h} />
             </div>
           ))}
         </div>
