@@ -576,14 +576,15 @@ section.block:first-of-type { border-top: none; }
 .whyus-photo:hover img { transform: scale(1.05); }
 
 /* ===== «Τα μαθήματα» ===== */
+/* Desktop: 2×2 grid of shorter, landscape cards (owner request). */
 .courses-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 18px;
 }
 .course-card {
   position: relative;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 16 / 10;
   border-radius: var(--radius-md);
   overflow: hidden;
   box-shadow: var(--shadow-md);
