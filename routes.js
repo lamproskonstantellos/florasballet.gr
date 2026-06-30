@@ -19,6 +19,7 @@
      /diagonismoi      competitions  { page: "competitions" }
      /nea              news list     { page: "news-list" }
      /nea/<slug>       article       { page: "article", slug }
+     /epikoinonia      contact       { page: "contact" }
      (anything else)   not found     { page: "not-found" }
    ============================================================ */
 
@@ -30,6 +31,7 @@
     if (p === "/didaskontes") return { page: "teachers" };
     if (p === "/diagonismoi") return { page: "competitions" };
     if (p === "/nea") return { page: "news-list" };
+    if (p === "/epikoinonia") return { page: "contact" };
     const m = p.match(/^\/nea\/([^/]+)$/);
     if (m) return { page: "article", slug: m[1] };
     return { page: "not-found" };
@@ -42,6 +44,7 @@
     if (route.page === "competitions") return "/diagonismoi";
     if (route.page === "news-list") return "/nea";
     if (route.page === "article") return "/nea/" + route.slug;
+    if (route.page === "contact") return "/epikoinonia";
     if (route.page === "home" && route.section) return "/#" + route.section;
     return "/";
   }
@@ -76,6 +79,8 @@
         return `Διαγωνισμοί – ${ctx.siteName}`;
       case "news-list":
         return `Νέα & Ανακοινώσεις – ${ctx.siteName}`;
+      case "contact":
+        return `Επικοινωνία – ${ctx.siteName}`;
       case "article":
         return ctx.articleTitle
           ? `${ctx.articleTitle} – ${ctx.siteName}`

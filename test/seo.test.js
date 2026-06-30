@@ -46,7 +46,7 @@ test("/nea/ serves 200 with canonical to /nea (no trailing slash)", async () => 
 // ---- Every 200 route is self-consistent (canonical == og:url) --------------
 
 test("200 routes have self-consistent canonical, og:url, title", async () => {
-  const routes = ["/", "/i-scholi", "/didaskontes", "/diagonismoi", "/nea", `/nea/${ARTICLE}`];
+  const routes = ["/", "/i-scholi", "/didaskontes", "/diagonismoi", "/nea", "/epikoinonia", `/nea/${ARTICLE}`];
   for (const p of routes) {
     const html = (await request(base, p)).body.toString("utf8");
     const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)[1];

@@ -100,7 +100,7 @@ test("App observes the home sections and drives the Header via activeSection", (
   const src = fs.readFileSync(path.join(ROOT, "app.jsx"), "utf8");
   assert.match(src, /rootMargin:\s*"-15% 0px -80% 0px"/, "near-top band rootMargin missing");
   assert.ok(src.includes("pickActiveSection("), "App must resolve the section via pickActiveSection");
-  assert.match(src, /\["giati-emas",\s*"mathimata",\s*"nea",\s*"epikoinonia"\]/, "section order missing");
+  assert.match(src, /\["giati-emas",\s*"mathimata",\s*"nea"\]/, "section order missing");
   assert.ok(src.includes("activeSection={activeSection}"), "Header must receive activeSection");
   assert.match(src, /activeSection === "mathimata"/, "home nav highlight must follow the scroll-spy");
   assert.ok(src.includes("io.disconnect()"), "observer must be disconnected on leave");
@@ -154,7 +154,7 @@ test("NotFound offers routes onward: home, /nea, contact", () => {
   const notFound = src.slice(src.indexOf("function NotFound"), src.indexOf("function App"));
   assert.match(notFound, /href="\/"/, "missing back-to-home link");
   assert.match(notFound, /href="\/nea"/, "missing /nea link");
-  assert.match(notFound, /href="\/#epikoinonia"/, "missing contact link");
+  assert.match(notFound, /href="\/epikoinonia"/, "missing contact link");
   assert.ok(notFound.includes("handleAnchorClick"), "links must go through SPA navigation");
   assert.ok(!notFound.includes("style={{"), "404 styling lives in styles.css, not inline");
 });

@@ -80,7 +80,7 @@ function Header({ route, navigate, activeSection }) {
   const MATH = { page: "home", section: "mathimata" };
   const COMP = { page: "competitions" };
   const NEWS = { page: "news-list" };
-  const CONTACT = { page: "home", section: "epikoinonia" };
+  const CONTACT = { page: "contact" };
 
   return (
     <>
@@ -280,6 +280,18 @@ function HomePage({ navigate }) {
       <WhyUs />
       <Courses />
       <NewsPreview navigate={navigate} />
+    </div>
+  );
+}
+
+/* ============================================================
+   CONTACT PAGE — the «Επικοινωνία» section promoted to its own
+   route (/epikoinonia) so it isn't duplicated above the footer.
+   ============================================================ */
+
+function ContactPage() {
+  return (
+    <div className="page contact-page">
       <Contact />
     </div>
   );
@@ -312,8 +324,8 @@ function NotFound({ navigate }) {
         </a>
         <a
           className="btn btn-ghost"
-          href="/#epikoinonia"
-          onClick={(e) => handleAnchorClick(e, navigate, { page: "home", section: "epikoinonia" })}
+          href="/epikoinonia"
+          onClick={(e) => handleAnchorClick(e, navigate, { page: "contact" })}
         >
           Επικοινωνία
         </a>
@@ -326,7 +338,7 @@ function NotFound({ navigate }) {
    APP
    ============================================================ */
 
-const HOME_SECTION_IDS = ["giati-emas", "mathimata", "nea", "epikoinonia"];
+const HOME_SECTION_IDS = ["giati-emas", "mathimata", "nea"];
 
 function App() {
   const [route, setRoute] = useState(() => parseRoute(window.location.pathname));
@@ -362,8 +374,8 @@ function App() {
 
   // Scroll-spy (homepage only): observe the home sections against a thin band
   // just below the sticky header and highlight the one crossing it. Only
-  // "mathimata" and "epikoinonia" map to nav items; the others simply leave the
-  // nav unhighlighted (like the carousel/intro region).
+  // "mathimata" maps to a nav item; the others simply leave the nav
+  // unhighlighted (like the carousel/intro region).
   useEffect(() => {
     if (route.page !== "home") { setActiveSection(null); return; }
     const sections = HOME_SECTION_IDS
@@ -433,6 +445,7 @@ function App() {
         {route.page === "school" && <SchoolPage navigate={navigate} />}
         {route.page === "teachers" && <TeachersPage navigate={navigate} />}
         {route.page === "competitions" && <CompetitionsPage navigate={navigate} />}
+        {route.page === "contact" && <ContactPage navigate={navigate} />}
         {route.page === "news-list" && <NewsListPage navigate={navigate} />}
         {route.page === "article" && <Article slug={route.slug} navigate={navigate} />}
         {route.page === "not-found" && <NotFound navigate={navigate} />}
