@@ -186,7 +186,14 @@ function Header({ route, navigate, activeSection }) {
           <div className="mobile-backdrop" onClick={() => setMobileOpen(false)} />
           <div className="mobile-menu" ref={mobileRef} role="dialog" aria-modal="true" aria-label="Μενού">
             <div className="mobile-menu-head">
-              <img src={SITE.logoNav} alt={SITE.name} width="550" height="270" />
+              <a
+                className="brand"
+                href="/"
+                aria-label={`${SITE.name}, Αρχική`}
+                onClick={(e) => go(e, { page: "home" })}
+              >
+                <img src={SITE.logoNav} alt={SITE.name} width="550" height="270" />
+              </a>
               <button
                 type="button"
                 className="mobile-close"
@@ -237,7 +244,11 @@ function Footer() {
 
         <div className="footer-col">
           <h4>Επικοινωνία</h4>
-          <p>{SITE.address.street}<br />{SITE.address.postalCode} {SITE.address.area}</p>
+          <p>
+            <a href={SITE.mapsLink} target="_blank" rel="noopener noreferrer">
+              {SITE.address.street}<br />{SITE.address.postalCode} {SITE.address.area}
+            </a>
+          </p>
           {SITE.phones.map((p) => (
             <a key={p.tel} href={`tel:${p.tel}`}>{p.display}</a>
           ))}

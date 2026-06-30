@@ -13,7 +13,7 @@
 function HomeIntro() {
   return (
     <div className="home-intro">
-      <p className="home-eyebrow">40 χρόνια — ρυθμός, κίνηση &amp; αγάπη για τον χορό</p>
+      <p className="home-eyebrow">40 χρόνια ρυθμός, κίνηση &amp; αγάπη για τον χορό</p>
       <h1>{SCHOOL.h1}</h1>
       <p className="sub">{SCHOOL.h1Sub}</p>
     </div>
@@ -112,7 +112,7 @@ function Contact() {
   const [fb, ig] = SITE.socialLinks;
   return (
     <section className="block" id="epikoinonia">
-      <SectionHeader center kicker="Ελάτε να χορέψουμε" title="Επικοινωνία" />
+      <SectionHeader center as="h1" kicker="Ελάτε να χορέψουμε" title="Επικοινωνία" />
       <div className="contact-shell">
         <div className="contact-info">
           <ContactInfoRow icon={Icon.phone} label="Τηλέφωνα">
@@ -137,7 +137,9 @@ function Contact() {
           </ContactInfoRow>
 
           <ContactInfoRow icon={Icon.pin} label="Διεύθυνση">
-            {SITE.address.street}, {SITE.address.postalCode} {SITE.address.area}
+            <a href={SITE.mapsLink} target="_blank" rel="noopener noreferrer">
+              {SITE.address.street}, {SITE.address.postalCode} {SITE.address.area}
+            </a>
           </ContactInfoRow>
 
           <div className="contact-social">
