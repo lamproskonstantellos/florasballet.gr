@@ -3,6 +3,7 @@
 [![Live site](https://img.shields.io/badge/live-florasballet.gr-2ea44f?style=flat&logo=cloudflare&logoColor=white)](https://florasballet.gr/)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Deployed on Cloudflare Pages](https://img.shields.io/badge/deployed%20on-Cloudflare%20Pages-F38020?logo=cloudflarepages&logoColor=white)](https://pages.cloudflare.com/)
+[![Live site](https://img.shields.io/badge/live-florasballet.gr-blue)](https://florasballet.gr/)
 
 The website of **Σχολή Μπαλέτου Φλώρας Μουστάκη** (Flora's Ballet) — a state-recognized ballet school in Menidi (Acharnes), Greece, since 1986. A fast, minimal, Greek-only single-page application: home (hero carousel, courses, news, contact), the school, the teachers, the competition distinctions, and a news/announcements system.
 
