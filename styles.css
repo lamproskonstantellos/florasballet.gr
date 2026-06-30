@@ -73,6 +73,10 @@
   outline-offset: 2px;
 }
 html, body { margin: 0; padding: 0; }
+/* Always reserve the scrollbar gutter so the centered layout doesn't shift
+   horizontally when navigating between tall (scrollbar) and short (no
+   scrollbar) pages. */
+html { scrollbar-gutter: stable; }
 body {
   font-family: var(--font-sans);
   background: var(--bg);
