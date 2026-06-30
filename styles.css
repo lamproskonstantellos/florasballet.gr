@@ -453,32 +453,6 @@ section.block:first-of-type { border-top: none; }
     linear-gradient(0deg, rgba(67, 35, 47, 0.62) 0%, rgba(67, 35, 47, 0.10) 38%, rgba(67, 35, 47, 0) 60%);
   z-index: 2;
 }
-.carousel-overlay {
-  position: absolute;
-  z-index: 3;
-  left: 0; right: 0; bottom: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 0 24px 58px;
-}
-.carousel-overlay img {
-  width: clamp(150px, 22vw, 220px);
-  height: auto;
-  margin: 0 auto 14px;
-  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.35));
-}
-.carousel-tagline {
-  font-family: var(--font-serif);
-  color: #fff;
-  font-size: clamp(19px, 3.1vw, 30px);
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  margin: 0;
-  text-shadow: 0 2px 16px rgba(67, 35, 47, 0.55);
-  max-width: 22ch;
-}
 .carousel-arrow {
   position: absolute;
   top: 50%;
