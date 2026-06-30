@@ -115,7 +115,7 @@ h1, h2, h3, h4 { font-family: var(--font-serif); }
   line-height: 0;
 }
 .brand-logo {
-  height: 46px;
+  height: 58px;
   width: auto;
   display: block;
 }
@@ -453,32 +453,6 @@ section.block:first-of-type { border-top: none; }
     linear-gradient(0deg, rgba(67, 35, 47, 0.62) 0%, rgba(67, 35, 47, 0.10) 38%, rgba(67, 35, 47, 0) 60%);
   z-index: 2;
 }
-.carousel-overlay {
-  position: absolute;
-  z-index: 3;
-  left: 0; right: 0; bottom: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 0 24px 58px;
-}
-.carousel-overlay img {
-  width: clamp(150px, 22vw, 220px);
-  height: auto;
-  margin: 0 auto 14px;
-  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.35));
-}
-.carousel-tagline {
-  font-family: var(--font-serif);
-  color: #fff;
-  font-size: clamp(19px, 3.1vw, 30px);
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  margin: 0;
-  text-shadow: 0 2px 16px rgba(67, 35, 47, 0.55);
-  max-width: 22ch;
-}
 .carousel-arrow {
   position: absolute;
   top: 50%;
@@ -610,6 +584,8 @@ section.block:first-of-type { border-top: none; }
 .whyus-photo img { width: 100%; height: 100%; object-fit: cover; transition: transform 700ms cubic-bezier(.2,.7,.2,1); }
 .whyus-photo:hover img { transform: scale(1.05); }
 .whyus-photo.tall { grid-row: span 2; aspect-ratio: 3 / 5; }
+/* This landscape photo is cropped tall; frame it on the foreground skirt. */
+.whyus-photo.tall img { object-position: 70% center; }
 .whyus-photo.wide { grid-column: 1 / -1; aspect-ratio: 16 / 9; }
 
 /* ===== «Τα μαθήματα» ===== */
@@ -727,7 +703,11 @@ section.block:first-of-type { border-top: none; }
   text-transform: uppercase;
   color: var(--muted-2);
   margin-bottom: 9px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
 }
+.news-card .meta .meta-loc { color: var(--muted); }
 .news-card h3 {
   font-size: 22px;
   font-weight: 600;
@@ -1027,7 +1007,11 @@ section.block:first-of-type { border-top: none; }
   text-transform: uppercase;
   color: var(--muted-2);
   margin-bottom: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
 }
+.article-meta .meta-loc { color: var(--muted); }
 .article h1 {
   font-size: clamp(30px, 4.2vw, 46px);
   line-height: 1.1;
@@ -1214,6 +1198,15 @@ section.block:first-of-type { border-top: none; }
 }
 .contact-row .value a { color: var(--ink); }
 .contact-row .value a:hover { color: var(--accent); }
+.contact-row .value .contact-line + .contact-line { margin-top: 2px; }
+.hours-line {
+  display: flex;
+  gap: 14px;
+}
+.hours-line .day { width: 165px; flex-shrink: 0; }
+.hours-line .day,
+.hours-line .time { white-space: nowrap; }
+.hours-line .time { color: var(--muted); }
 .contact-social { display: flex; gap: 10px; margin-top: 6px; }
 .contact-social a {
   width: 44px; height: 44px;
@@ -1368,7 +1361,7 @@ section.block:first-of-type { border-top: none; }
   .whyus-photos { grid-template-columns: 1fr 1fr; }
   .carousel-viewport { aspect-ratio: 4 / 5; }
   .site-footer-inner { grid-template-columns: 1fr; gap: 28px; }
-  .brand-logo { height: 40px; }
+  .brand-logo { height: 48px; }
   .carousel-arrow { width: 40px; height: 40px; }
 }
 

@@ -27,7 +27,8 @@ function NewsCard({ article, index = 0, navigate, revealKey, isVisible, from }) 
       </div>
       <div className="body">
         <div className="meta">
-          {article.dateLabel}{article.location ? ` · ${article.location}` : ""}
+          <span className="meta-date">{article.dateLabel}</span>
+          {article.location ? <span className="meta-loc">{article.location}</span> : null}
         </div>
         <h3>{article.title}</h3>
         <p>{article.excerpt}</p>
@@ -275,7 +276,8 @@ function Article({ slug, navigate }) {
     <div className="page article">
       {backLink}
       <div className="article-meta">
-        {article.dateLabel}{article.location ? ` · ${article.location}` : ""}
+        <span className="meta-date">{article.dateLabel}</span>
+        {article.location ? <span className="meta-loc">{article.location}</span> : null}
       </div>
       <h1>{article.title}</h1>
       {article.cover && (
@@ -342,7 +344,7 @@ function Article({ slug, navigate }) {
           Πηγές:{" "}
           {article.sources.map((s, i) => (
             <React.Fragment key={i}>
-              {i > 0 && " · "}
+              {i > 0 && ", "}
               <a href={s.href} target="_blank" rel="noopener noreferrer">{s.label}</a>
             </React.Fragment>
           ))}

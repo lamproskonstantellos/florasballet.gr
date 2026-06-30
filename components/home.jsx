@@ -112,11 +112,10 @@ function Contact() {
       <div className="contact-shell">
         <div className="contact-info">
           <ContactInfoRow icon={Icon.phone} label="Τηλέφωνα">
-            {SITE.phones.map((p, i) => (
-              <React.Fragment key={p.tel}>
-                {i > 0 ? " · " : null}
+            {SITE.phones.map((p) => (
+              <div className="contact-line" key={p.tel}>
                 <a href={`tel:${p.tel}`}>{p.display}</a>
-              </React.Fragment>
+              </div>
             ))}
           </ContactInfoRow>
 
@@ -126,12 +125,15 @@ function Contact() {
 
           <ContactInfoRow icon={Icon.clock} label="Ώρες λειτουργίας">
             {SITE.hours.map((h) => (
-              <div key={h.label}>{h.label} · {h.time}</div>
+              <div className="hours-line" key={h.label}>
+                <span className="day">{h.label}</span>
+                <span className="time">{h.time}</span>
+              </div>
             ))}
           </ContactInfoRow>
 
           <ContactInfoRow icon={Icon.pin} label="Διεύθυνση">
-            {SITE.address.street}, {SITE.address.area}
+            {SITE.address.street}, {SITE.address.postalCode} {SITE.address.area}
           </ContactInfoRow>
 
           <div className="contact-social">
@@ -147,7 +149,7 @@ function Contact() {
         <div className="contact-map">
           <iframe
             src={SITE.mapEmbed}
-            title="Χάρτης: Κωνσταντινουπόλεως 322, Μενίδι (Αχαρνές)"
+            title={`Χάρτης: ${SITE.address.street}, ${SITE.address.postalCode} ${SITE.address.area}`}
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
             allowFullScreen

@@ -1,4 +1,4 @@
-/* global React, SITE, SCHOOL, Picture, Icon */
+/* global React, SITE, Picture, Icon */
 
 /* ============================================================
    HERO CAROUSEL
@@ -15,7 +15,6 @@ function Carousel() {
   const { useState, useEffect, useRef, useCallback } = React;
   const slides = (typeof SITE !== "undefined" && SITE.carousel) || [];
   const count = slides.length;
-  const tagline = (typeof SCHOOL !== "undefined" && SCHOOL.heroTagline) || "";
 
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -86,13 +85,6 @@ function Carousel() {
         ))}
 
         <div className="carousel-scrim" aria-hidden="true" />
-
-        {tagline ? (
-          <div className="carousel-overlay" aria-hidden="true">
-            <img src={SITE.logoAnniversary} alt="" width="220" height="108" />
-            <p className="carousel-tagline">{tagline}</p>
-          </div>
-        ) : null}
 
         {count > 1 && (
           <>
