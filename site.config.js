@@ -20,7 +20,7 @@ const SITE = {
   // Phones: `display` is shown to humans, `tel` is the tel: href target.
   phones: [
     { display: "210 2468962", tel: "+302102468962" },
-    { display: "6989448068", tel: "+306989448068" },
+    { display: "698 9448068", tel: "+306989448068" },
   ],
 
   address: {
