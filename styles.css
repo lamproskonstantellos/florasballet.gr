@@ -479,6 +479,10 @@ section.block:first-of-type { border-top: none; }
 .carousel-arrow.next { right: 18px; }
 .carousel-arrow.prev:hover { transform: translateY(-50%) translateX(-2px); }
 .carousel-arrow.next:hover { transform: translateY(-50%) translateX(2px); }
+/* On touch devices, swipe + dots are enough; the arrows only overlap the photo. */
+@media (hover: none) {
+  .carousel-arrow { display: none; }
+}
 .carousel-dots {
   position: absolute;
   z-index: 4;
