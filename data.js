@@ -211,7 +211,7 @@ const COMPETITIONS = {
           results: [
             "1η θέση solo preparatory division",
             "1η θέση ensemble preparatory division, «Magic Birds»",
-            "1η θέση ensemble junior division, «Experiense» (και 1η θέση στους τελικούς)",
+            "1η θέση ensemble junior division, «Experience» (και 1η θέση στους τελικούς)",
             "2η θέση solo senior division στους τελικούς, Ιωάννου Δάφνη",
           ],
         },
