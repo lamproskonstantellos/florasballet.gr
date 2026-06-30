@@ -457,36 +457,6 @@ section.block:first-of-type { border-top: none; }
     linear-gradient(0deg, rgba(67, 35, 47, 0.62) 0%, rgba(67, 35, 47, 0.10) 38%, rgba(67, 35, 47, 0) 60%);
   z-index: 2;
 }
-.carousel-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 4;
-  width: 42px;
-  height: 42px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  background: rgba(67, 35, 47, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 50%;
-  backdrop-filter: blur(4px);
-  /* Discreet: invisible until the carousel is hovered or focused. */
-  opacity: 0;
-  transition: opacity var(--transition), background var(--transition), transform var(--transition);
-}
-.carousel:hover .carousel-arrow,
-.carousel:focus-within .carousel-arrow { opacity: 1; }
-.carousel-arrow:hover { background: rgba(67, 35, 47, 0.46); }
-.carousel-arrow.prev { left: 18px; }
-.carousel-arrow.next { right: 18px; }
-.carousel-arrow.prev:hover { transform: translateY(-50%) translateX(-2px); }
-.carousel-arrow.next:hover { transform: translateY(-50%) translateX(2px); }
-/* On touch devices, swipe + dots are enough; the arrows only overlap the photo. */
-@media (hover: none) {
-  .carousel-arrow { display: none; }
-}
 .carousel-dots {
   position: absolute;
   z-index: 4;
@@ -1384,7 +1354,6 @@ section.block:first-of-type { border-top: none; }
   .carousel-viewport { aspect-ratio: 1 / 1; }
   .site-footer-inner { grid-template-columns: 1fr; gap: 28px; }
   .brand-logo { height: 64px; }
-  .carousel-arrow { width: 40px; height: 40px; }
 }
 
 /* ===== Reduced motion ===== */
