@@ -131,7 +131,7 @@ function Contact() {
           </ContactInfoRow>
 
           <ContactInfoRow icon={Icon.pin} label="Διεύθυνση">
-            {SITE.address.street}, {SITE.address.area}
+            {SITE.address.street}, {SITE.address.postalCode} {SITE.address.area}
           </ContactInfoRow>
 
           <div className="contact-social">
@@ -147,7 +147,7 @@ function Contact() {
         <div className="contact-map">
           <iframe
             src={SITE.mapEmbed}
-            title="Χάρτης: Κωνσταντινουπόλεως 322, Μενίδι (Αχαρνές)"
+            title={`Χάρτης: ${SITE.address.street}, ${SITE.address.postalCode} ${SITE.address.area}`}
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
             allowFullScreen

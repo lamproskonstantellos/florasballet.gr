@@ -232,7 +232,7 @@ function Footer() {
 
         <div className="footer-col">
           <h4>Επικοινωνία</h4>
-          <p>{SITE.address.street}<br />{SITE.address.area}</p>
+          <p>{SITE.address.street}<br />{SITE.address.postalCode} {SITE.address.area}</p>
           {SITE.phones.map((p) => (
             <a key={p.tel} href={`tel:${p.tel}`}>{p.display}</a>
           ))}
