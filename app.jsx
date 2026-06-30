@@ -79,7 +79,7 @@ function Header({ route, navigate, activeSection }) {
   const ABOUT = { page: "school" };
   const MATH = { page: "home", section: "mathimata" };
   const COMP = { page: "competitions" };
-  const NEWS = { page: "news-list" };
+  const NEWS = { page: "home", section: "nea" };
   const CONTACT = { page: "contact" };
 
   return (
@@ -148,7 +148,7 @@ function Header({ route, navigate, activeSection }) {
             Διαγωνισμοί
           </a>
           <a
-            className={"nav-link" + (newsActive ? " active" : "")}
+            className={"nav-link" + ((onHome && activeSection === "nea") || newsActive ? " active" : "")}
             href={routeToPath(NEWS)}
             onClick={(e) => go(e, NEWS)}
           >
