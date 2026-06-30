@@ -7,7 +7,7 @@
 
 const { useState, useEffect, useCallback, useRef } = React;
 
-const HEADER_OFFSET = 76;
+const HEADER_OFFSET = 92;
 
 /* ============================================================
    HEADER — sticky, translucent, with the «Η Σχολή» dropdown and

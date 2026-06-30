@@ -119,7 +119,7 @@ h1, h2, h3, h4 { font-family: var(--font-serif); }
   line-height: 0;
 }
 .brand-logo {
-  height: 58px;
+  height: 70px;
   width: auto;
   display: block;
 }
@@ -272,7 +272,7 @@ h1, h2, h3, h4 { font-family: var(--font-serif); }
   padding-bottom: 14px;
   border-bottom: 1px solid var(--line);
 }
-.mobile-menu-head img { height: 42px; width: auto; }
+.mobile-menu-head img { height: 52px; width: auto; }
 .mobile-close {
   width: 42px; height: 42px;
   display: inline-flex;
@@ -876,7 +876,7 @@ section.block:first-of-type { border-top: none; }
   aspect-ratio: 1072 / 1500;
   background: var(--cream);
   position: sticky;
-  top: 96px;
+  top: 108px;
 }
 .teacher-photo img { width: 100%; height: 100%; object-fit: cover; }
 .teacher-name {
@@ -961,7 +961,7 @@ section.block:first-of-type { border-top: none; }
   color: var(--accent);
   line-height: 1;
   position: sticky;
-  top: 92px;
+  top: 108px;
   align-self: start;
 }
 .comp-events { display: flex; flex-direction: column; gap: 24px; }
@@ -1365,7 +1365,7 @@ section.block:first-of-type { border-top: none; }
   .whyus-photos { grid-template-columns: 1fr 1fr; }
   .carousel-viewport { aspect-ratio: 4 / 5; }
   .site-footer-inner { grid-template-columns: 1fr; gap: 28px; }
-  .brand-logo { height: 48px; }
+  .brand-logo { height: 56px; }
   .carousel-arrow { width: 40px; height: 40px; }
 }
 
