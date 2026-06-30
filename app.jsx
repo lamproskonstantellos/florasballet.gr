@@ -83,6 +83,7 @@ function Header({ route, navigate, activeSection }) {
   const CONTACT = { page: "home", section: "epikoinonia" };
 
   return (
+    <>
     <header className="site-header">
       <div className="site-header-inner">
         <a
@@ -174,8 +175,12 @@ function Header({ route, navigate, activeSection }) {
           <Icon.menu style={{ width: 24, height: 24 }} />
         </button>
       </div>
+      </header>
 
-      {/* Mobile panel */}
+      {/* Mobile panel — rendered as a sibling of the header, not a child: the
+          header's backdrop-filter establishes a containing block for fixed
+          descendants, which would otherwise clip this position:fixed panel to
+          the header's own height instead of letting it fill the viewport. */}
       {mobileOpen && (
         <>
           <div className="mobile-backdrop" onClick={() => setMobileOpen(false)} />
@@ -212,7 +217,7 @@ function Header({ route, navigate, activeSection }) {
           </div>
         </>
       )}
-    </header>
+    </>
   );
 }
 
