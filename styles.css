@@ -1364,7 +1364,7 @@ section.block:first-of-type { border-top: none; }
 @media (max-width: 560px) {
   .courses-grid { grid-template-columns: 1fr; }
   .course-card { aspect-ratio: 16 / 11; }
-  .carousel-viewport { aspect-ratio: 1 / 1; }
+  .carousel-viewport { aspect-ratio: 3 / 2; } /* landscape — shorter, less tall crop than square */
   .site-footer-inner { grid-template-columns: 1fr; gap: 28px; }
   .brand-logo { height: 74px; }
 }
