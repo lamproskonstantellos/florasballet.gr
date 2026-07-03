@@ -493,7 +493,10 @@ section.block:first-of-type { border-top: none; }
 /* ===== Home title block ===== */
 .home-intro {
   text-align: center;
-  padding: 56px 0 8px;
+  /* Bottom padding matches a section's top padding (64px) so the divider
+     below the intro sits symmetrically — equal space to the subtitle above
+     and the next section's heading below, like every other section divider. */
+  padding: 56px 0 64px;
   max-width: 760px;
   margin: 0 auto;
 }
