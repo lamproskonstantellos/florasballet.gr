@@ -301,7 +301,7 @@ function Article({ slug, navigate }) {
           <video
             controls
             preload="metadata"
-            poster={article.poster ? asset(article.poster) : undefined}
+            poster={article.poster ? asset(article.poster) : (article.cover ? asset(article.cover) : undefined)}
           >
             <source src={asset(article.video)} type="video/mp4" />
           </video>
