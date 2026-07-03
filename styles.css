@@ -1218,7 +1218,9 @@ section.block:first-of-type { border-top: none; }
 .contact-row .value .contact-line + .contact-line { margin-top: 2px; }
 .hours-line {
   display: flex;
-  gap: 14px;
+  flex-wrap: wrap;   /* on very narrow phones the time drops below the day
+                        instead of forcing the row wider than the viewport */
+  gap: 2px 14px;
 }
 .hours-line .day { width: 165px; flex-shrink: 0; }
 .hours-line .day,
