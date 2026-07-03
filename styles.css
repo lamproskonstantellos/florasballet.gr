@@ -650,6 +650,12 @@ section.block:first-of-type { border-top: none; }
 }
 .course-card:hover .course-body p,
 .course-card:focus-within .course-body p { max-height: 220px; opacity: 1; }
+/* Any device that cannot hover (touch phones and tablets, of any width — the
+   960px width rule below misses landscape tablets) always shows the copy: the
+   card has no focusable child, so hover/focus-within can never reveal it there. */
+@media (hover: none) {
+  .course-body p { max-height: 220px; opacity: 1; }
+}
 .course-body .course-rule {
   width: 34px;
   height: 2px;
