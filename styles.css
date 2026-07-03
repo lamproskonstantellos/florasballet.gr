@@ -493,7 +493,10 @@ section.block:first-of-type { border-top: none; }
 /* ===== Home title block ===== */
 .home-intro {
   text-align: center;
-  padding: 56px 0 8px;
+  /* Bottom padding matches a section's top padding (64px) so the divider
+     below the intro sits symmetrically — equal space to the subtitle above
+     and the next section's heading below, like every other section divider. */
+  padding: 56px 0 64px;
   max-width: 760px;
   margin: 0 auto;
 }
@@ -706,6 +709,11 @@ section.block:first-of-type { border-top: none; }
   gap: 2px 12px;
 }
 .news-card .meta .meta-loc { color: var(--muted); }
+.news-card .meta .meta-loc::before {
+  content: "·";
+  margin-inline-end: 12px;
+  color: var(--muted-2);
+}
 .news-card h3 {
   font-size: 22px;
   font-weight: 600;
@@ -1016,6 +1024,11 @@ section.block:first-of-type { border-top: none; }
   gap: 2px 12px;
 }
 .article-meta .meta-loc { color: var(--muted); }
+.article-meta .meta-loc::before {
+  content: "·";
+  margin-inline-end: 12px;
+  color: var(--muted-2);
+}
 .article h1 {
   font-size: clamp(30px, 4.2vw, 46px);
   line-height: 1.1;

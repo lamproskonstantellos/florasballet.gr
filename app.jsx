@@ -425,13 +425,35 @@ function App() {
     });
   }, []);
 
+  // Mirror the scroll-spy into the URL: as each home section crosses the band,
+  // replace (never push — scrolling must not spam the back button) the #section
+  // in the address bar, so the URL always names the section in view and any of
+  // them is copyable as a deep link; cleared to "/" at the very top. The first
+  // run on entering the home route is skipped so a deep-link hash (/#mathimata)
+  // is not wiped before the observer confirms it.
+  const hashSyncArmed = useRef(false);
+  useEffect(() => {
+    if (route.page !== "home") { hashSyncArmed.current = false; return; }
+    if (!hashSyncArmed.current) { hashSyncArmed.current = true; return; }
+    const targetUrl = "/" + (activeSection ? "#" + activeSection : "");
+    if (window.location.pathname + window.location.hash !== targetUrl) {
+      window.history.replaceState(window.history.state, "", targetUrl);
+    }
+  }, [route.page, activeSection]);
+
   const navigate = useCallback((next, opts = {}) => {
     const targetPath = routeToPath(next).split("#")[0] || "/";
+    // Preserve the #section for home-section targets so every nav control
+    // (desktop nav, mobile menu, "back to Νέα" links — anything routed through
+    // here) yields a copyable deep link, e.g. "Μαθήματα" → /#mathimata.
+    const targetHash = next.page === "home" && next.section ? "#" + next.section : "";
+    const targetUrl = targetPath + targetHash;
     const stateData = opts.from !== undefined ? { from: opts.from } : {};
-    if (window.location.pathname !== targetPath) {
-      window.history.pushState(stateData, "", targetPath);
+    const currentUrl = window.location.pathname + window.location.hash;
+    if (currentUrl !== targetUrl) {
+      window.history.pushState(stateData, "", targetUrl);
     } else if (opts.from !== undefined) {
-      window.history.replaceState(stateData, "", targetPath);
+      window.history.replaceState(stateData, "", targetUrl);
     }
     setRoute(next);
 
