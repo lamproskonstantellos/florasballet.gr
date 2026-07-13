@@ -22,7 +22,7 @@ const path = require("path");
 
 const {
   renderHtml,
-  discoverArticleSlugs,
+  VALID_ARTICLE_SLUGS,
   ARTICLES,
   ARTICLE_SCRIPTS,
   ASSET_MAP,
@@ -194,7 +194,7 @@ function buildStatic({ outDir = DEFAULT_OUT } = {}) {
   fs.rmSync(outDir, { recursive: true, force: true });
   ensureDir(outDir);
 
-  const slugs = discoverArticleSlugs();
+  const slugs = VALID_ARTICLE_SLUGS;
 
   // --- 1. Pre-render one HTML file per route to its directory-index path ----
   const htmlRoutes = [

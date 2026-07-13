@@ -235,8 +235,13 @@ for (const slug of ARTICLE_SLUGS) {
     ARTICLE_COVER_VERSION[slug] = imageVersion(path.join(PUBLIC_DIR, meta.cover));
   }
 }
-const ARTICLES = ARTICLE_SLUGS.map((slug) => ARTICLE_META[slug]).filter(Boolean);
-const ARTICLE_SCRIPTS = ARTICLE_SLUGS
+// Only slugs whose article.js loaded AND validated are routable/shippable. A
+// folder with an invalid article.js (loadArticleMeta returned null) must not
+// become a 200 route or inject a <script> that throws validateArticle in the
+// browser — it would be a soft-404 with broken JS.
+const VALID_ARTICLE_SLUGS = ARTICLE_SLUGS.filter((slug) => ARTICLE_META[slug]);
+const ARTICLES = VALID_ARTICLE_SLUGS.map((slug) => ARTICLE_META[slug]);
+const ARTICLE_SCRIPTS = VALID_ARTICLE_SLUGS
   .map((slug) => `<script src="/news/${slug}/article.js"></script>`)
   .join("\n");
 const ASSET_MAP = loadAssetMap();
@@ -493,7 +498,7 @@ function writeCompressed(req, res, headers, data, cacheKey) {
 }
 
 function isValidSpaRoute(pathname) {
-  return routeIsValidSpa(pathname, ARTICLE_SLUGS);
+  return routeIsValidSpa(pathname, VALID_ARTICLE_SLUGS);
 }
 
 // Replace the __META_*__ placeholders in index.html with per-route values.
@@ -856,6 +861,7 @@ module.exports = {
   isValidSpaRoute,
   loadArticleMeta,
   discoverArticleSlugs,
+  VALID_ARTICLE_SLUGS,
   SECURITY_HEADERS,
   isPrivatePath,
   DEPLOY_VERSION,
