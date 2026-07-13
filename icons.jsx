@@ -24,11 +24,6 @@ const Icon = {
       <path d="M13 8H3" /><path d="M7 4L3 8l4 4" />
     </svg>
   ),
-  external: (p) => (
-    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" {...p}>
-      <path d="M5 9L9 5" /><path d="M6 5h3v3" />
-    </svg>
-  ),
   link: (p) => (
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" {...p}>
       <path d="M6.5 9.5l3-3" />

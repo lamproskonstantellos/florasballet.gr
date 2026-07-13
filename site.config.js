@@ -57,7 +57,6 @@ const SITE = {
   // The nav/menu use the full-resolution mark (550×270) so it stays crisp on
   // high-DPI screens; the small 244×120 "-nav" copy looked soft when enlarged.
   logoNav: "/brand/logo-anniversary.png",
-  logoAnniversary: "/brand/logo-anniversary.png",
   logoOnWhite: "/brand/logo-anniversary-on-white.png",
 
   // Home hero carousel slides, in order. The first is the LCP image (preloaded
