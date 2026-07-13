@@ -235,7 +235,7 @@ const COMPETITIONS = {
 
 /* ---- Display caps for homepage previews ---- */
 const LIMITS = {
-  newsPreview: 3,
+  newsPreview: 4,
 };
 
 /* ---- Selectors (news auto-sorted, newest first) ---- */

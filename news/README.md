@@ -1,6 +1,6 @@
 # Νέα & Ανακοινώσεις (Articles)
 
-Each article is a self-contained package inside its own folder under `news/<slug>/`: the text, the cover image and any in-article photos all live together. Articles are sorted automatically by `date` (newest first), both on the homepage preview (capped at 3) and on the full `/nea` list page.
+Each article is a self-contained package inside its own folder under `news/<slug>/`: the text, the cover image and any in-article photos all live together. Articles are sorted automatically by `date` (newest first), both on the homepage preview (capped at 4) and on the full `/nea` list page.
 
 The static build (`build-static.js`) discovers `news/` at build time and injects a `<script>` tag for each `news/<slug>/article.js` it finds, and the local preview server (`server.js`) does the same on each request — so adding an article requires no edits to `data.js` or `index.html`.
 
@@ -66,10 +66,10 @@ Validation lives in `article-schema.js` (`validateArticle`) and runs in **both**
 
 ## Routes
 
-- `/`: homepage with the news preview (max 3, newest first)
+- `/`: homepage with the news preview (max 4, newest first)
 - `/nea`: full list of all articles
 - `/nea/<slug>`: single article view
 
 ## Tweaking the homepage cap
 
-Edit `LIMITS.newsPreview` in `/data.js` (default: `3`). The "Όλα τα νέα" link appears automatically when there are more articles than the cap.
+Edit `LIMITS.newsPreview` in `/data.js` (default: `4`). The "Όλα τα νέα" link appears automatically when there are more articles than the cap.
