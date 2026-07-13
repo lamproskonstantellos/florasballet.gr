@@ -87,15 +87,14 @@ function Carousel() {
         <div className="carousel-scrim" aria-hidden="true" />
 
         {count > 1 && (
-          <div className="carousel-dots" role="tablist" aria-label="Επιλογή διαφάνειας">
+          <div className="carousel-dots" role="group" aria-label="Επιλογή διαφάνειας">
               {slides.map((_, i) => (
                 <button
                   key={i}
                   type="button"
-                  role="tab"
                   className={"carousel-dot" + (i === index ? " active" : "")}
                   aria-label={`Διαφάνεια ${i + 1}`}
-                  aria-selected={i === index ? "true" : "false"}
+                  aria-current={i === index ? "true" : undefined}
                   onClick={() => goTo(i)}
                 />
               ))}

@@ -10,7 +10,8 @@
    - Article:      /nea/<slug> full article view
    ============================================================ */
 
-function NewsCard({ article, index = 0, navigate, revealKey, isVisible, from }) {
+function NewsCard({ article, index = 0, navigate, revealKey, isVisible, from, headingLevel = "h3" }) {
+  const Heading = headingLevel;
   const route = { page: "article", slug: article.slug };
   return (
     <a
@@ -30,7 +31,7 @@ function NewsCard({ article, index = 0, navigate, revealKey, isVisible, from }) 
           <span className="meta-date">{article.dateLabel}</span>
           {article.location ? <span className="meta-loc">{article.location}</span> : null}
         </div>
-        <h3>{article.title}</h3>
+        <Heading>{article.title}</Heading>
         <p>{article.excerpt}</p>
         <span className="read">
           Διαβάστε περισσότερα <Icon.arrowRight style={{ width: 13, height: 13 }} />
@@ -110,6 +111,7 @@ function NewsListPage({ navigate }) {
               revealKey={`news-list-${i}`}
               isVisible={visible.has(`news-list-${i}`)}
               from="news-list"
+              headingLevel="h2"
             />
           ))}
         </div>
