@@ -759,6 +759,20 @@ const server = http.createServer((req, res) => {
       return;
     }
 
+    // Re-run the private-path guard on the CANONICAL (post-normalization) path.
+    // A pre-normalized spelling such as "/%2e%2fserver.js" decodes to
+    // "/./server.js", which slips past the raw-pathname check above (its "/."
+    // is followed by "/") yet normalizes to "/server.js". Checking the
+    // normalized, root-relative path closes that disclosure bypass.
+    const canonicalPath =
+      requestedPath === PUBLIC_DIR
+        ? "/"
+        : "/" + path.relative(PUBLIC_DIR, requestedPath).split(path.sep).join("/");
+    if (isPrivatePath(canonicalPath)) {
+      sendStatus(res, 404, "404 Not Found");
+      return;
+    }
+
     if (urlPathname === "/sitemap.xml") {
       const xml = buildSitemap({ articles: ARTICLES, siteCfg: SITE_CFG });
       writeCompressed(req, res, {
