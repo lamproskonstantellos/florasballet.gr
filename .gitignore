@@ -10,6 +10,18 @@ verification-report.md
 trash/
 archive/
 
+# Secrets / local env
+.env
+.env.*
+
+# Logs
+*.log
+
+# Editor / IDE cruft
+.idea/
+.vscode/
+*.swp
+
 # Draft / scratch news folders (underscore- or dot-prefixed). A real article
 # slug can only be [a-z0-9-]+, so these are never shippable articles — they are
 # ignored by discoverArticleSlugs and must never be committed.

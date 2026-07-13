@@ -719,6 +719,7 @@ section.block:first-of-type { border-top: none; }
   margin-inline: 10px;
   color: var(--muted-2);
 }
+.news-card h2,
 .news-card h3 {
   font-size: 22px;
   font-weight: 600;

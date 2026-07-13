@@ -84,6 +84,29 @@ test("sibling-directory prefix cannot escape the public root", async () => {
   assert.ok([400, 403, 404].includes(res.status));
 });
 
+// Encoded single-dot ("/%2e%2f" -> "/./") normalizes to a private file inside
+// the root. It passes the traversal check (never escapes the root) so the
+// private-path guard must run on the NORMALIZED path, not the raw one.
+test("encoded './' cannot disclose private source files", async () => {
+  const corpus = [
+    "/%2e%2fserver.js",
+    "/%2e%2ffeeds.js",
+    "/%2e%2fbuild-static.js",
+    "/%2e%2fpackage.json",
+    "/%2e%2fREADME.md",
+    "/%2e%2fdist%2fmanifest.json",
+    "/%2e%2ftest%2fsecurity.test.js",
+    "/%2e%2f%2e%2fserver.js",
+  ];
+  for (const p of corpus) {
+    const res = await request(base, p);
+    assert.equal(res.status, 404, `${p} must be blocked (private-path bypass)`);
+    const body = res.body.toString("utf8");
+    assert.ok(!body.includes("PUBLIC_DIR"), `${p} leaked server.js source`);
+    assert.ok(!body.includes("require("), `${p} leaked JS source`);
+  }
+});
+
 // ---- Oversized / odd inputs -------------------------------------------------
 
 test("very long URL does not crash", async () => {

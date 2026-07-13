@@ -235,8 +235,13 @@ for (const slug of ARTICLE_SLUGS) {
     ARTICLE_COVER_VERSION[slug] = imageVersion(path.join(PUBLIC_DIR, meta.cover));
   }
 }
-const ARTICLES = ARTICLE_SLUGS.map((slug) => ARTICLE_META[slug]).filter(Boolean);
-const ARTICLE_SCRIPTS = ARTICLE_SLUGS
+// Only slugs whose article.js loaded AND validated are routable/shippable. A
+// folder with an invalid article.js (loadArticleMeta returned null) must not
+// become a 200 route or inject a <script> that throws validateArticle in the
+// browser — it would be a soft-404 with broken JS.
+const VALID_ARTICLE_SLUGS = ARTICLE_SLUGS.filter((slug) => ARTICLE_META[slug]);
+const ARTICLES = VALID_ARTICLE_SLUGS.map((slug) => ARTICLE_META[slug]);
+const ARTICLE_SCRIPTS = VALID_ARTICLE_SLUGS
   .map((slug) => `<script src="/news/${slug}/article.js"></script>`)
   .join("\n");
 const ASSET_MAP = loadAssetMap();
@@ -338,7 +343,12 @@ function computePageMeta(pathname) {
         "datePublished": article.date,
         "dateModified": article.date,
         "author": { "@type": "Organization", "name": SITE_CFG.name, "url": SITE_CFG.url },
-        "publisher": { "@type": "Organization", "name": SITE_CFG.name, "url": SITE_CFG.url },
+        "publisher": {
+          "@type": "Organization",
+          "name": SITE_CFG.name,
+          "url": SITE_CFG.url,
+          "logo": { "@type": "ImageObject", "url": `${SITE_CFG.url}${SITE_CFG.logoOnWhite}` },
+        },
         "mainEntityOfPage": `${SITE_CFG.url}/nea/${article.slug}`,
         "articleBody": articleBody,
         "wordCount": wordCount,
@@ -488,7 +498,7 @@ function writeCompressed(req, res, headers, data, cacheKey) {
 }
 
 function isValidSpaRoute(pathname) {
-  return routeIsValidSpa(pathname, ARTICLE_SLUGS);
+  return routeIsValidSpa(pathname, VALID_ARTICLE_SLUGS);
 }
 
 // Replace the __META_*__ placeholders in index.html with per-route values.
@@ -759,6 +769,20 @@ const server = http.createServer((req, res) => {
       return;
     }
 
+    // Re-run the private-path guard on the CANONICAL (post-normalization) path.
+    // A pre-normalized spelling such as "/%2e%2fserver.js" decodes to
+    // "/./server.js", which slips past the raw-pathname check above (its "/."
+    // is followed by "/") yet normalizes to "/server.js". Checking the
+    // normalized, root-relative path closes that disclosure bypass.
+    const canonicalPath =
+      requestedPath === PUBLIC_DIR
+        ? "/"
+        : "/" + path.relative(PUBLIC_DIR, requestedPath).split(path.sep).join("/");
+    if (isPrivatePath(canonicalPath)) {
+      sendStatus(res, 404, "404 Not Found");
+      return;
+    }
+
     if (urlPathname === "/sitemap.xml") {
       const xml = buildSitemap({ articles: ARTICLES, siteCfg: SITE_CFG });
       writeCompressed(req, res, {
@@ -837,6 +861,7 @@ module.exports = {
   isValidSpaRoute,
   loadArticleMeta,
   discoverArticleSlugs,
+  VALID_ARTICLE_SLUGS,
   SECURITY_HEADERS,
   isPrivatePath,
   DEPLOY_VERSION,
