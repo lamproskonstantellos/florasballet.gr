@@ -338,7 +338,12 @@ function computePageMeta(pathname) {
         "datePublished": article.date,
         "dateModified": article.date,
         "author": { "@type": "Organization", "name": SITE_CFG.name, "url": SITE_CFG.url },
-        "publisher": { "@type": "Organization", "name": SITE_CFG.name, "url": SITE_CFG.url },
+        "publisher": {
+          "@type": "Organization",
+          "name": SITE_CFG.name,
+          "url": SITE_CFG.url,
+          "logo": { "@type": "ImageObject", "url": `${SITE_CFG.url}${SITE_CFG.logoOnWhite}` },
+        },
         "mainEntityOfPage": `${SITE_CFG.url}/nea/${article.slug}`,
         "articleBody": articleBody,
         "wordCount": wordCount,
