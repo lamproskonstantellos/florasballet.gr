@@ -240,14 +240,24 @@ function loadArticleMeta(slug) {
   if (!fs.existsSync(file)) return null;
   try {
     const code = fs.readFileSync(file, "utf8");
-    let captured = null;
-    const capture = (article) => { captured = article; };
+    // Accumulate like the browser does (defineArticle PUSHES every call): an
+    // assign-only capture would silently keep just the last article of a
+    // multi-defineArticle file, shipping cards the server never routed. One
+    // article per folder is the contract — reject anything else loudly.
+    const capturedList = [];
+    const capture = (article) => { capturedList.push(article); };
     const fakeWindow = {
       NEWS_ARTICLES: { push: capture },
       defineArticle: capture,
       validateArticle,
     };
     new Function("window", "defineArticle", code)(fakeWindow, capture);
+    if (capturedList.length > 1) {
+      throw new Error(
+        `folder "${slug}" defines ${capturedList.length} articles — exactly one article.js definition per folder`
+      );
+    }
+    const captured = capturedList[0] || null;
     if (captured) {
       validateArticle(captured);
       // The folder name is the single owner of the slug. If the article's own
@@ -709,11 +719,16 @@ function serveIndex(req, res, filePath, pathname, statusCode = 200) {
       assetMap: ASSET_MAP,
     });
     const contentType = "text/html; charset=utf-8";
+    // The not-found page is byte-identical for every unknown path (its meta
+    // ignores the pathname), so all 404s share ONE cache entry — otherwise a
+    // scanner hitting unknown URLs would evict every real page from the
+    // bounded compression cache.
+    const cacheKey = statusCode === 404 ? "html:404" : `html:${pathname}`;
     writeCompressed(req, res, {
       "Content-Type": contentType,
       "Cache-Control": cacheHeaderFor(req, contentType),
       __status: statusCode,
-    }, versioned, `html:${pathname}`);
+    }, versioned, cacheKey);
   });
 }
 

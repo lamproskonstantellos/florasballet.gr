@@ -99,9 +99,12 @@ function buildRss({ articles, siteCfg }) {
     })
     .join("\n");
 
-  const lastBuildDate = items.length
-    ? new Date(`${items[0].date}T00:00:00Z`).toUTCString()
-    : new Date().toUTCString();
+  // Deterministic even with zero items: wall-clock time would make the feed
+  // body differ per request/build and turn the byte-parity guarantee into a
+  // clock race. Falls back to the same fixed epoch the sitemap uses.
+  const lastBuildDate = new Date(
+    `${items.length ? items[0].date : "2026-01-01"}T00:00:00Z`
+  ).toUTCString();
 
   return (
     `<?xml version="1.0" encoding="UTF-8"?>\n` +
