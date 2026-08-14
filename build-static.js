@@ -76,6 +76,7 @@ const MUST_BE_ABSENT = [
   "server.js",
   "build-static.js",
   "feeds.js",
+  "static-html.js",
   "package.json",
   "package-lock.json",
   ".gitignore",
