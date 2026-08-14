@@ -56,9 +56,17 @@ function Header({ route, navigate, activeSection }) {
     const onKey = (e) => {
       if (e.key !== "Escape") return;
       setDropdownOpen(false);
-      // Return focus to the trigger — otherwise it lands on the now-hidden menu
-      // item and the browser drops it to <body>, restarting Tab from the top.
-      if (dropdownTriggerRef.current) dropdownTriggerRef.current.focus();
+      // Return focus to the trigger ONLY if focus is actually inside the
+      // dropdown (it would land on a now-hidden menu item and fall to <body>).
+      // The dropdown also opens on hover with focus elsewhere on the page —
+      // stealing focus up to the nav on that Escape would lose the user's place.
+      if (
+        dropdownTriggerRef.current &&
+        dropdownRef.current &&
+        dropdownRef.current.contains(document.activeElement)
+      ) {
+        dropdownTriggerRef.current.focus();
+      }
     };
     document.addEventListener("mousedown", onDoc);
     document.addEventListener("keydown", onKey);

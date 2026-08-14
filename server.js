@@ -514,6 +514,17 @@ function parseRequestUrl(req) {
   // and dropping it from the pathname. Collapse leading slashes and prefix the
   // origin so "//nea" stays "/nea" and the query string is preserved.
   let target = req.url || "/";
+  // Absolute-form targets (`GET http://host/path` — RFC 9112 §3.2.2 says a
+  // server MUST accept them) are reduced to their path + query first, so the
+  // scheme does not end up inside the pathname.
+  if (/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(target)) {
+    try {
+      const abs = new URL(target);
+      target = abs.pathname + abs.search;
+    } catch {
+      target = "/";
+    }
+  }
   if (target[0] !== "/") target = "/" + target;
   target = target.replace(/^\/+/, "/");
   return new URL("http://localhost" + target);
