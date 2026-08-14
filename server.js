@@ -6,7 +6,7 @@ const crypto = require("crypto");
 const { URL } = require("url");
 const SITE_CFG = require("./site.config.js");
 const { parseRoute, isValidSpaRoute: routeIsValidSpa, pageTitle } = require("./routes.js");
-const { validateArticle } = require("./article-schema.js");
+const { validateArticle, compareByDateDesc } = require("./article-schema.js");
 const { buildSitemap, buildRss, buildFeed } = require("./feeds.js");
 
 const PORT = process.env.PORT || 3000;
@@ -111,6 +111,55 @@ function imageVersion(absPath) {
   }
 }
 
+// The home page's canonical / og:url / sitemap <loc> all carry a trailing slash
+// ("https://florasballet.gr/"), so every JSON-LD reference to the home resource
+// must use the SAME spelling or the breadcrumb root fails to string-match the
+// page it points at. HOME_URL is that single spelling; ORG_ID/SITE_ID are stable
+// node identifiers so the DanceSchool, WebSite and per-article publisher/author
+// reconcile into one linked entity instead of three disconnected ones.
+const HOME_URL = `${SITE_CFG.url}/`;
+const ORG_ID = `${SITE_CFG.url}/#organization`;
+const SITE_ID = `${SITE_CFG.url}/#website`;
+
+// Local time zone offset for Greece (EET/EEST). Article dates are stored as bare
+// YYYY-MM-DD; stamping a fixed offset keeps datePublished/dateModified from
+// being interpreted in the crawler's own zone (which can shift the SERP date).
+const TZ_OFFSET = "+03:00";
+
+// Map a schema.org openingHours shorthand ("Mo-Fr 17:00-22:30") to an
+// OpeningHoursSpecification object, the form Google actually consumes for the
+// local-business rich result.
+const DAY_ORDER = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+const DAY_NAMES = {
+  Mo: "Monday", Tu: "Tuesday", We: "Wednesday", Th: "Thursday",
+  Fr: "Friday", Sa: "Saturday", Su: "Sunday",
+};
+function openingHoursSpec(shorthand) {
+  const [days, hours] = shorthand.split(" ");
+  const [opens, closes] = hours.split("-");
+  let codes;
+  if (days.includes("-")) {
+    const [a, b] = days.split("-");
+    codes = DAY_ORDER.slice(DAY_ORDER.indexOf(a), DAY_ORDER.indexOf(b) + 1);
+  } else {
+    codes = [days];
+  }
+  return {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": codes.map((c) => DAY_NAMES[c]),
+    "opens": opens,
+    "closes": closes,
+  };
+}
+
+// Strip the inline **bold** emphasis markers from body text before it goes into
+// machine-read surfaces (JSON-LD articleBody, JSON Feed content_text): the
+// browser renders ** as <strong>, so the markers never appear to a human and
+// must not appear in structured data or a plain-text feed either.
+function stripEmphasis(s) {
+  return String(s).replace(/\*\*([^*]+)\*\*/g, "$1");
+}
+
 const DEFAULT_IMAGE_PATH = path.join(PUBLIC_DIR, SITE_CFG.defaultImage.replace(/^\//, ""));
 const DEFAULT_IMAGE_VERSION = imageVersion(DEFAULT_IMAGE_PATH);
 const DEFAULT_IMAGE = `${SITE_CFG.url}${SITE_CFG.defaultImage}${DEFAULT_IMAGE_VERSION ? `?v=${DEFAULT_IMAGE_VERSION}` : ""}`;
@@ -128,15 +177,18 @@ const SCHOOL_JSONLD = {
   "@graph": [
     {
       "@type": "WebSite",
+      "@id": SITE_ID,
       "name": SITE_CFG.name,
-      "url": SITE_CFG.url,
+      "url": HOME_URL,
       "inLanguage": "el",
+      "publisher": { "@id": ORG_ID },
     },
     {
       "@type": ["DanceSchool", "LocalBusiness"],
+      "@id": ORG_ID,
       "name": SITE_CFG.name,
       "alternateName": SITE_CFG.shortName,
-      "url": SITE_CFG.url,
+      "url": HOME_URL,
       "image": DEFAULT_IMAGE,
       "logo": `${SITE_CFG.url}${SITE_CFG.logoOnWhite}`,
       "description": DEFAULT_DESCRIPTION,
@@ -158,7 +210,7 @@ const SCHOOL_JSONLD = {
       },
       "hasMap": `https://www.google.com/maps?q=${SITE_CFG.geo.lat},${SITE_CFG.geo.lng}`,
       "areaServed": "Αχαρνές, Αττική",
-      "openingHours": SITE_CFG.hours.map((h) => h.schema),
+      "openingHoursSpecification": SITE_CFG.hours.map((h) => openingHoursSpec(h.schema)),
       "sameAs": SITE_CFG.socialLinks,
     },
   ],
@@ -172,7 +224,7 @@ function breadcrumbJsonLd(label, urlPath) {
       {
         "@type": "BreadcrumbList",
         "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Αρχική", "item": SITE_CFG.url },
+          { "@type": "ListItem", "position": 1, "name": "Αρχική", "item": HOME_URL },
           { "@type": "ListItem", "position": 2, "name": label, "item": `${SITE_CFG.url}${urlPath}` },
         ],
       },
@@ -313,6 +365,22 @@ function computePageMeta(pathname) {
 
   const stat = STATIC_PAGES[route.page];
   if (stat) {
+    const jsonLd = breadcrumbJsonLd(stat.label, stat.path);
+    // /nea is a collection page: enumerate the articles (newest first) as an
+    // ItemList so the index is associated with the posts it lists and crawlers
+    // get an in-HTML list of article URLs the JS-free document otherwise lacks.
+    if (route.page === "news-list" && ARTICLES.length) {
+      const ordered = [...ARTICLES].sort(compareByDateDesc);
+      jsonLd["@graph"].push({
+        "@type": "ItemList",
+        "itemListElement": ordered.map((a, i) => ({
+          "@type": "ListItem",
+          "position": i + 1,
+          "url": `${SITE_CFG.url}/nea/${a.slug}`,
+          "name": a.title,
+        })),
+      });
+    }
     return {
       title: pageTitle(route, titleCtx),
       description: stat.description,
@@ -322,7 +390,7 @@ function computePageMeta(pathname) {
       imageHeight: DEFAULT_IMAGE_DIMS && DEFAULT_IMAGE_DIMS.height,
       imageAlt: SITE_CFG.name,
       ogType: "website",
-      jsonLd: breadcrumbJsonLd(stat.label, stat.path),
+      jsonLd,
     };
   }
 
@@ -335,21 +403,25 @@ function computePageMeta(pathname) {
         : DEFAULT_IMAGE;
       const imageDimensions = article.cover ? ARTICLE_COVER_DIMS[route.slug] : DEFAULT_IMAGE_DIMS;
 
-      const articleBody = Array.isArray(article.body) ? article.body.join("\n\n") : "";
+      const articleBody = Array.isArray(article.body)
+        ? stripEmphasis(article.body.join("\n\n"))
+        : "";
       const wordCount = articleBody ? articleBody.trim().split(/\s+/).length : 0;
+      const dateTime = `${article.date}T00:00:00${TZ_OFFSET}`;
 
       const articleSchema = {
         "@type": "Article",
         "headline": article.title,
         "description": article.excerpt,
         "image": image,
-        "datePublished": article.date,
-        "dateModified": article.date,
-        "author": { "@type": "Organization", "name": SITE_CFG.name, "url": SITE_CFG.url },
+        "datePublished": dateTime,
+        "dateModified": dateTime,
+        "author": { "@type": "Organization", "@id": ORG_ID, "name": SITE_CFG.name, "url": HOME_URL },
         "publisher": {
           "@type": "Organization",
+          "@id": ORG_ID,
           "name": SITE_CFG.name,
-          "url": SITE_CFG.url,
+          "url": HOME_URL,
           "logo": { "@type": "ImageObject", "url": `${SITE_CFG.url}${SITE_CFG.logoOnWhite}` },
         },
         "mainEntityOfPage": `${SITE_CFG.url}/nea/${article.slug}`,
@@ -367,11 +439,25 @@ function computePageMeta(pathname) {
       const breadcrumbs = {
         "@type": "BreadcrumbList",
         "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Αρχική", "item": SITE_CFG.url },
+          { "@type": "ListItem", "position": 1, "name": "Αρχική", "item": HOME_URL },
           { "@type": "ListItem", "position": 2, "name": "Νέα & Ανακοινώσεις", "item": `${SITE_CFG.url}/nea` },
           { "@type": "ListItem", "position": 3, "name": article.title, "item": `${SITE_CFG.url}/nea/${article.slug}` },
         ],
       };
+
+      // Open Graph `article` object properties — the timestamp, section and tags
+      // that Facebook/LinkedIn/Slack render on the unfurl card. Every value is
+      // already in the JSON-LD on the same page; this just exposes it to OG.
+      const articleTagLines = [
+        `<meta property="article:published_time" content="${escapeHtml(dateTime)}" />`,
+        `<meta property="article:modified_time" content="${escapeHtml(dateTime)}" />`,
+      ];
+      if (article.articleSection) {
+        articleTagLines.push(`<meta property="article:section" content="${escapeHtml(article.articleSection)}" />`);
+      }
+      for (const kw of article.keywords || []) {
+        articleTagLines.push(`<meta property="article:tag" content="${escapeHtml(kw)}" />`);
+      }
 
       return {
         title: pageTitle(route, { ...titleCtx, articleTitle: article.title }),
@@ -382,6 +468,7 @@ function computePageMeta(pathname) {
         imageHeight: imageDimensions && imageDimensions.height,
         imageAlt: article.title,
         ogType: "article",
+        articleTags: articleTagLines.join("\n"),
         jsonLd: {
           "@context": "https://schema.org",
           "@graph": [breadcrumbs, articleSchema],
@@ -540,7 +627,13 @@ function injectMeta(html, meta) {
     IMAGE_ALT: () => escapeHtml(meta.imageAlt || meta.title),
     OG_TYPE: () => escapeHtml(meta.ogType),
     ARTICLE_TAGS: () => (meta.articleTags ? meta.articleTags : ""),
-    JSONLD: () => (meta.jsonLd ? jsonLdScript(meta.jsonLd) : ""),
+    // Emit the whole <script> element only when there is a graph, so routes
+    // with no structured data (the 404 page) ship no empty ld+json block for a
+    // validator to choke on.
+    JSONLD: () =>
+      meta.jsonLd
+        ? `<script type="application/ld+json">${jsonLdScript(meta.jsonLd)}</script>`
+        : "",
     PRELOAD: () => meta.preloadImage
       ? `<link rel="preload" as="image" href="${escapeHtml(meta.preloadImage)}" type="image/avif" fetchpriority="high" />`
       : "",
