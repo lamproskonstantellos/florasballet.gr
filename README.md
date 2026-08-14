@@ -32,7 +32,7 @@ npm run build          # optimize images + compile JSX → dist/
 npm run build:static   # pre-render every route → build/
 ```
 
-`build-static.js` reuses the server's `renderHtml` and `feeds.js` builders, so every page, feed and header file in `build/` is byte-identical to what `server.js` serves (modulo the per-deploy `?v=` token), asserted by `test/parity.test.js`. Only an explicit allowlist of public assets is copied into `build/`; source, tooling, config, the design palette, the reference screenshots, the original masters and the content brief never are.
+`build-static.js` reuses the server's `renderHtml` and `feeds.js` builders, so every page, feed and header file in `build/` is byte-identical to what `server.js` serves (modulo the per-deploy `?v=` token), asserted by `test/parity.test.js`. Only an explicit allowlist of public assets is copied into `build/`; everything else — the source, build tooling, config, the test suite, the design palette and any local project material — never is.
 
 **Cloudflare Pages settings**
 

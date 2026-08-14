@@ -3,9 +3,12 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
 
 <!-- Icons & manifest -->
 <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
+<link rel="icon" type="image/png" sizes="48x48" href="/favicon/favicon-48x48.png" />
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png" />
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png" />
 <link rel="icon" type="image/x-icon" href="/favicon/favicon.ico" />
@@ -29,6 +32,7 @@
 <meta property="og:image:alt" content="Σχολή Μπαλέτου Φλώρας Μουστάκη" />
 <meta property="og:locale" content="el_GR" />
 
+
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Νέα &amp; Ανακοινώσεις – Σχολή Μπαλέτου Φλώρας Μουστάκη" />
@@ -40,17 +44,20 @@
 <link rel="alternate" type="application/rss+xml" title="Σχολή Μπαλέτου Φλώρας Μουστάκη – Νέα" href="/rss.xml" />
 <link rel="alternate" type="application/feed+json" title="Σχολή Μπαλέτου Φλώρας Μουστάκη – Νέα (JSON Feed)" href="/feed.json" />
 
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Αρχική","item":"https://florasballet.gr"},{"@type":"ListItem","position":2,"name":"Νέα & Ανακοινώσεις","item":"https://florasballet.gr/nea"}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Αρχική","item":"https://florasballet.gr/"},{"@type":"ListItem","position":2,"name":"Νέα & Ανακοινώσεις","item":"https://florasballet.gr/nea"}]},{"@type":"ItemList","itemListElement":[{"@type":"ListItem","position":1,"url":"https://florasballet.gr/nea/enarxi-eggrafon-2026-2027","name":"Έναρξη εγγραφών για τη χρονιά 2026–2027"},{"@type":"ListItem","position":2,"url":"https://florasballet.gr/nea/40-chronia-scholis","name":"Γιορτάζουμε τα 40 χρόνια της σχολής μας"},{"@type":"ListItem","position":3,"url":"https://florasballet.gr/nea/pagkosmia-imera-chorou","name":"Παγκόσμια ημέρα χορού"},{"@type":"ListItem","position":4,"url":"https://florasballet.gr/nea/parastasi-alice-in-wonderland","name":"Καλοκαιρινή παράσταση χορού: Alice in Wonderland"},{"@type":"ListItem","position":5,"url":"https://florasballet.gr/nea/festival-entechnou-chorou","name":"Πρώτο Φεστιβάλ έντεχνου χορού"}]}]}</script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
+<!-- Own CSS first (same-origin) so the layout paints without waiting on the
+     render-blocking third-party font stylesheet that follows. -->
 <link rel="stylesheet" href="/styles.css?v=V" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
 <a class="skip-link" href="#main-content">Μετάβαση στο κύριο περιεχόμενο</a>
 <div id="root"></div>
+<noscript><div class="noscript-fallback"><h1>Σχολή Μπαλέτου Φλώρας Μουστάκη</h1><p>Αναγνωρισμένη από το κράτος σχολή μπαλέτου στο Μενίδι (Αχαρνές) από το 1986. Κλασικό μπαλέτο, σύγχρονος χορός, μουσικοκινητική αγωγή και μοντέρνο/hip hop, για όλες τις ηλικίες.</p><p><strong>Τηλέφωνα:</strong> 210 2468962 · 698 9448068</p><p><strong>Email:</strong> info@florasballet.gr</p><p><strong>Διεύθυνση:</strong> Κωνσταντινουπόλεως 322, 13671 Μενίδι (Αχαρνές)</p><p><strong>Ώρες:</strong> Δευτέρα–Παρασκευή 17:00–22:30 · Σάββατο 10:00–15:00</p><p>Για την πλήρη περιήγηση στον ιστότοπο απαιτείται JavaScript.</p></div></noscript>
 
 <script src="/vendor/react.production.min.js?v=V"></script>
 <script src="/vendor/react-dom.production.min.js?v=V"></script>

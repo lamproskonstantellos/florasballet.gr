@@ -23,7 +23,7 @@ function NewsCard({ article, index = 0, navigate, revealKey, isVisible, from, he
     >
       <div className={"cover" + (article.coverAlign === "top" ? " cover-align-top" : "")}>
         {article.cover
-          ? <Picture src={asset(article.cover)} alt={article.title} width="640" height="400" />
+          ? <Picture src={asset(article.cover)} alt="" width="640" height="400" />
           : <div className="ph">[ news/{article.slug}/cover.jpg ]</div>}
       </div>
       <div className="body">
@@ -160,14 +160,15 @@ function Lightbox({ src, alt, onClose }) {
       >
         ×
       </button>
-      <img
-        className="lightbox-img"
-        src={src}
-        alt={alt || ""}
-        loading="eager"
-        decoding="async"
-        onClick={(e) => e.stopPropagation()}
-      />
+      <div className="lightbox-figure" onClick={(e) => e.stopPropagation()}>
+        <Picture
+          className="lightbox-img"
+          src={src}
+          alt={alt || ""}
+          loading="eager"
+          decoding="async"
+        />
+      </div>
     </div>
   );
 }
@@ -286,7 +287,7 @@ function Article({ slug, navigate }) {
         <div className={"article-cover" + (article.coverAlign === "top" ? " cover-align-top" : "")}>
           <Picture
             src={asset(article.cover)}
-            alt={article.title}
+            alt=""
             width="1280"
             height="720"
             loading="eager"
@@ -314,7 +315,11 @@ function Article({ slug, navigate }) {
           {article.photos.map((photo, i) => {
             const photoSrc = typeof photo === "string" ? photo : photo.src;
             const alignTop = typeof photo === "object" && photo.align === "top";
-            const photoAlt = `Φωτογραφία ${i + 1} από «${article.title}»`;
+            // Prefer an author-supplied alt ({ src, alt }); fall back to a
+            // positional label so the image is never left unlabelled.
+            const photoAlt =
+              (typeof photo === "object" && photo.alt) ||
+              `Φωτογραφία ${i + 1} από «${article.title}»`;
             const open = () => setLightboxSrc({ src: asset(photoSrc), alt: photoAlt });
             return (
               <div
@@ -356,4 +361,4 @@ function Article({ slug, navigate }) {
   );
 }
 
-Object.assign(window, { NewsCard, NewsPreview, NewsListPage, Article });
+Object.assign(window, { NewsPreview, NewsListPage, Article });

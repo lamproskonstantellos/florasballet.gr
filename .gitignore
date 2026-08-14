@@ -9,6 +9,8 @@ verification-report.md
 *.avif
 trash/
 archive/
+_reference/
+*.docx
 
 # Secrets / local env
 .env

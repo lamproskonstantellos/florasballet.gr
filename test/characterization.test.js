@@ -19,6 +19,7 @@ const HTML_ROUTES = [
   ["/didaskontes", "teachers.html"],
   ["/diagonismoi", "competitions.html"],
   ["/nea", "news.html"],
+  ["/epikoinonia", "contact.html"],
   ["/nea/enarxi-eggrafon-2026-2027", "article.html"],
   ["/this-route-does-not-exist", "notfound.html"],
 ];
@@ -127,6 +128,7 @@ test("security header set", async () => {
     "strict-transport-security",
     "permissions-policy",
     "cross-origin-opener-policy",
+    "cross-origin-resource-policy",
     "content-security-policy",
   ]) {
     picked[k] = res.headers[k];

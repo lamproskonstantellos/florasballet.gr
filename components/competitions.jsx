@@ -11,6 +11,9 @@ function CompetitionsPage() {
   const visible = useReveal();
   React.useEffect(() => { window.scrollTo({ top: 0 }); }, []);
   const instagram = SITE.socialLinks[1];
+  // Derive the visible handle from the URL so the "single source of truth" can
+  // never leave a stale handle on screen.
+  const instagramHandle = "@" + instagram.replace(/\/+$/, "").split("/").pop();
 
   return (
     <div className="page comp-page">
@@ -27,12 +30,12 @@ function CompetitionsPage() {
           data-reveal={`year-${yi}`}
           key={y.year}
         >
-          <div className="comp-year-label">{y.year}</div>
+          <h2 className="comp-year-label">{y.year}</h2>
           <div className="comp-events">
             {y.events.map((ev, ei) => (
               <div className="comp-event" key={ei}>
-                <h2 className="comp-event-name">{ev.name}</h2>
-                <ul className="comp-results">
+                <h3 className="comp-event-name">{ev.name}</h3>
+                <ul className="comp-results" role="list">
                   {ev.results.map((r, ri) => (
                     <li key={ri}>{r}</li>
                   ))}
@@ -45,7 +48,7 @@ function CompetitionsPage() {
 
       <p className="comp-note">
         Περισσότερες φωτογραφίες από τους διαγωνισμούς στο Instagram:{" "}
-        <a href={instagram} target="_blank" rel="noopener noreferrer">@florasballet</a>.
+        <a href={instagram} target="_blank" rel="noopener noreferrer">{instagramHandle}</a>.
       </p>
     </div>
   );

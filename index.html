@@ -3,9 +3,12 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
 
 <!-- Icons & manifest -->
 <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
+<link rel="icon" type="image/png" sizes="48x48" href="/favicon/favicon-48x48.png" />
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png" />
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png" />
 <link rel="icon" type="image/x-icon" href="/favicon/favicon.ico" />
@@ -27,6 +30,7 @@
 __META_IMAGE_DIMS__
 <meta property="og:image:alt" content="__META_IMAGE_ALT__" />
 <meta property="og:locale" content="el_GR" />
+__META_ARTICLE_TAGS__
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image" />
@@ -39,17 +43,20 @@ __META_IMAGE_DIMS__
 <link rel="alternate" type="application/rss+xml" title="__META_SITE_NAME__ – Νέα" href="/rss.xml" />
 <link rel="alternate" type="application/feed+json" title="__META_SITE_NAME__ – Νέα (JSON Feed)" href="/feed.json" />
 
-<script type="application/ld+json">__META_JSONLD__</script>
+__META_JSONLD__
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 __META_PRELOAD__
+<!-- Own CSS first (same-origin) so the layout paints without waiting on the
+     render-blocking third-party font stylesheet that follows. -->
 <link rel="stylesheet" href="/styles.css" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
 <a class="skip-link" href="#main-content">Μετάβαση στο κύριο περιεχόμενο</a>
 <div id="root"></div>
+<noscript>__META_NOSCRIPT__</noscript>
 
 <script src="/vendor/react.production.min.js"></script>
 <script src="/vendor/react-dom.production.min.js"></script>

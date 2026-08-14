@@ -79,6 +79,14 @@ test("served og:site_name / application-name come from SITE.name", async () => {
   assert.match(html, new RegExp(`<meta name="application-name" content="${SITE.name}"`));
 });
 
+// ---- C4b: the web manifest identity comes from site.config -----------------
+
+test("site.webmanifest name/short_name match SITE", () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, "site.webmanifest"), "utf8"));
+  assert.equal(manifest.name, SITE.name, "manifest name drifted from SITE.name");
+  assert.equal(manifest.short_name, SITE.shortName, "manifest short_name drifted from SITE.shortName");
+});
+
 // ---- C5: LCP preload derived from the first carousel slide -----------------
 
 test("home preload is the AVIF sibling of SITE.carousel[0]", async () => {

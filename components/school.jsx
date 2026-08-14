@@ -42,7 +42,7 @@ function SchoolPage() {
       </section>
 
       <section className="school-block">
-        <h2 className="school-h2">Στόχος</h2>
+        <h2 className="school-h2">Στόχοι</h2>
         <div className="school-goals">
           {SCHOOL.goals.map((g, i) => (
             <div

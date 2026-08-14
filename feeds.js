@@ -32,9 +32,16 @@ const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 // The fixed (article-independent) pages, in sitemap order.
 const STATIC_PATHS = ["/", "/i-scholi", "/didaskontes", "/diagonismoi", "/nea", "/epikoinonia"];
 
+// The only fixed pages whose content actually changes when a news item is
+// published: the home page (news preview) and the news index. The other static
+// pages (school, teachers, competitions, contact) do not, so stamping them with
+// the newest article date is a false signal Google may learn to distrust — they
+// omit <lastmod> instead (it is optional).
+const NEWS_DRIVEN_PATHS = new Set(["/", "/nea"]);
+
 // sitemap.xml — the static pages, then one <url> per article in folder order.
-// The index pages share the most-recent article date as their lastmod so the
-// value only changes when content actually changes.
+// News-driven index pages carry the most-recent article date as their lastmod;
+// the rest omit it.
 function buildSitemap({ articles, siteCfg }) {
   const list = Array.isArray(articles) ? articles : [];
 
@@ -45,7 +52,10 @@ function buildSitemap({ articles, siteCfg }) {
     .reverse();
   const latestContentDate = articleDates[0] || "2026-01-01";
 
-  const entries = STATIC_PATHS.map((p) => ({ path: p, lastmod: latestContentDate }));
+  const entries = STATIC_PATHS.map((p) => ({
+    path: p,
+    lastmod: NEWS_DRIVEN_PATHS.has(p) ? latestContentDate : null,
+  }));
 
   for (const a of list) {
     entries.push({
@@ -58,7 +68,10 @@ function buildSitemap({ articles, siteCfg }) {
     `<?xml version="1.0" encoding="UTF-8"?>\n` +
     `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
     entries
-      .map((e) => `  <url>\n    <loc>${siteCfg.url}${e.path}</loc>\n    <lastmod>${e.lastmod}</lastmod>\n  </url>`)
+      .map((e) =>
+        `  <url>\n    <loc>${siteCfg.url}${e.path}</loc>` +
+        (e.lastmod ? `\n    <lastmod>${e.lastmod}</lastmod>` : "") +
+        `\n  </url>`)
       .join("\n") +
     `\n</urlset>\n`
   );
@@ -128,7 +141,12 @@ function buildFeed({ articles, siteCfg }) {
         id: url,
         url,
         title: a.title,
-        content_text: Array.isArray(a.body) ? a.body.join("\n\n") : "",
+        // Strip the inline **bold** markers: content_text is plain text by the
+        // JSON Feed spec, and the browser renders ** as <strong>, so the markers
+        // must not leak to feed subscribers.
+        content_text: Array.isArray(a.body)
+          ? a.body.join("\n\n").replace(/\*\*([^*]+)\*\*/g, "$1")
+          : "",
         summary: a.excerpt || "",
         date_published: new Date(`${a.date}T00:00:00Z`).toISOString(),
       };

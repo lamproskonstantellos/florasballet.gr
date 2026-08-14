@@ -5,6 +5,7 @@
 
 const { test } = require("node:test");
 const assert = require("node:assert");
+const fs = require("node:fs");
 const path = require("path");
 const esbuild = require("esbuild");
 
@@ -39,6 +40,23 @@ async function buildNames() {
   });
   return Object.keys(result.metafile.outputs).sort();
 }
+
+test("esbuild entry list matches the .jsx files on disk and the build script", () => {
+  const diskEntries = ["app.jsx", "icons.jsx"]
+    .concat(
+      fs.readdirSync(path.join(ROOT, "components"))
+        .filter((f) => f.endsWith(".jsx"))
+        .map((f) => "components/" + f)
+    )
+    .sort();
+  assert.deepEqual([...ENTRY].sort(), diskEntries, "ENTRY drifted from the .jsx files on disk");
+
+  const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8"));
+  for (const e of diskEntries) {
+    assert.ok(pkg.scripts.build.includes(` ${e} `), `package.json build script is missing ${e}`);
+    assert.ok(pkg.scripts.watch.includes(` ${e} `), `package.json watch script is missing ${e}`);
+  }
+});
 
 test("two esbuild runs produce identical hashed output names", async () => {
   const a = await buildNames();

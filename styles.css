@@ -89,6 +89,7 @@ body {
 a { color: var(--accent); text-decoration: none; transition: color var(--transition); }
 a:hover { color: var(--accent-hover); }
 img { max-width: 100%; display: block; }
+video, iframe { max-width: 100%; }
 button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
 
 h1, h2, h3, h4 { font-family: var(--font-serif); }
@@ -98,7 +99,10 @@ h1, h2, h3, h4 { font-family: var(--font-serif); }
   position: sticky;
   top: 0;
   z-index: 80;
-  background: rgba(255, 247, 250, 0.82);
+  /* Near-opaque: at 0.82 the muted nav links dropped below AA contrast when
+     dark page content (carousel, course cards, footer) scrolled beneath the
+     translucent, position:sticky header. */
+  background: rgba(255, 247, 250, 0.95);
   backdrop-filter: saturate(150%) blur(12px);
   -webkit-backdrop-filter: saturate(150%) blur(12px);
   border-bottom: 1px solid var(--line);
@@ -211,7 +215,9 @@ h1, h2, h3, h4 { font-family: var(--font-serif); }
 .dropdown-menu a:hover,
 .dropdown-menu a.active {
   background: var(--cream);
-  color: var(--accent);
+  /* --accent on --cream is 4.50:1, right on the AA edge; --accent-hover clears
+     it (6.4:1) for this persistent active state. */
+  color: var(--accent-hover);
 }
 
 .nav-cta {
@@ -298,8 +304,10 @@ h1, h2, h3, h4 { font-family: var(--font-serif); }
   border-bottom: 1px solid var(--line-soft);
 }
 .mobile-link:hover,
-.mobile-sub-trigger:hover { color: var(--accent); background: var(--cream); }
-.mobile-link.active { color: var(--accent); }
+.mobile-sub-trigger:hover { color: var(--accent-hover); background: var(--cream); }
+.mobile-link.active,
+.mobile-sub-trigger.active,
+.mobile-sub a.active { color: var(--accent); }
 .mobile-sub-trigger .chev { transition: transform var(--transition); }
 .mobile-sub-trigger[aria-expanded="true"] .chev { transform: rotate(180deg); }
 .mobile-sub {
@@ -468,26 +476,85 @@ section.block:first-of-type { border-top: none; }
 .carousel-dots {
   position: absolute;
   z-index: 4;
-  left: 0; right: 0; bottom: 20px;
+  left: 0; right: 0; bottom: 16px;
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 4px;
 }
+/* The button is a 24px transparent hit target (WCAG 2.5.8) with the 9px visual
+   dot drawn as ::before, so the touch affordance is large without changing the
+   design. A dark drop-shadow ring keeps the dot and its active/inactive state
+   distinguishable over bright slide imagery (WCAG 1.4.11). */
 .carousel-dot {
-  width: 9px;
-  height: 9px;
+  width: 24px;
+  height: 24px;
   padding: 0;
   -webkit-appearance: none;
   appearance: none;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  transition: all var(--transition);
+  background: none;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
-.carousel-dot:hover { background: rgba(255, 255, 255, 0.85); }
-.carousel-dot.active {
-  /* Active dot stays a round circle, simply filled white (no elongated pill). */
-  background: #fff;
+.carousel-dot::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 0 1px rgba(40, 18, 26, 0.35), 0 1px 2px rgba(40, 18, 26, 0.45);
+  transition: background var(--transition), transform var(--transition);
+}
+.carousel-dot:hover::before { background: rgba(255, 255, 255, 0.9); }
+.carousel-dot.active::before { background: #fff; transform: scale(1.15); }
+.carousel-dot:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 0;
+  border-radius: 50%;
+}
+
+/* Prev/next arrows and the play/pause toggle — persistent pointer controls the
+   carousel previously lacked (WCAG 2.2.2). White focus ring so it is visible on
+   the photographic backdrop. */
+.carousel-arrow,
+.carousel-playpause {
+  position: absolute;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: rgba(40, 18, 26, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  transition: background var(--transition);
+}
+.carousel-arrow:hover,
+.carousel-playpause:hover { background: rgba(40, 18, 26, 0.62); }
+.carousel-arrow:focus-visible,
+.carousel-playpause:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.carousel-arrow {
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+}
+.carousel-prev { left: 16px; }
+.carousel-next { right: 16px; }
+.carousel-playpause {
+  right: 16px;
+  bottom: 14px;
+  width: 40px;
+  height: 40px;
+}
+@media (max-width: 560px) {
+  .carousel-arrow { width: 38px; height: 38px; }
+  .carousel-prev { left: 8px; }
+  .carousel-next { right: 8px; }
+  .carousel-playpause { width: 36px; height: 36px; right: 10px; }
 }
 
 /* ===== Home title block ===== */
@@ -667,7 +734,9 @@ section.block:first-of-type { border-top: none; }
 /* ===== News (cards / grids) ===== */
 .news-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  /* min(290px, 100%) so a single column can shrink below 290px instead of
+     overflowing the content box (horizontal page scroll at ≤329px viewports). */
+  grid-template-columns: repeat(auto-fill, minmax(min(290px, 100%), 1fr));
   gap: 20px;
 }
 .news-card {
@@ -676,7 +745,7 @@ section.block:first-of-type { border-top: none; }
   border-radius: var(--radius-md);
   overflow: hidden;
   cursor: pointer;
-  transition: all var(--transition);
+  transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
   display: flex;
   flex-direction: column;
 }
@@ -701,7 +770,6 @@ section.block:first-of-type { border-top: none; }
 }
 .news-card .cover img { width: 100%; height: 100%; object-fit: cover; transition: transform 700ms cubic-bezier(.2, .7, .2, 1); }
 .news-card:hover .cover img { transform: scale(1.05); }
-.news-card .cover.cover-align-top img { object-position: top center; }
 .news-card .body { padding: 20px 22px 22px; flex: 1; display: flex; flex-direction: column; }
 .news-card .meta {
   font-family: var(--font-sans);
@@ -1096,6 +1164,7 @@ section.block:first-of-type { border-top: none; }
   animation: lightbox-in 180ms ease-out;
 }
 @keyframes lightbox-in { from { opacity: 0; } to { opacity: 1; } }
+.lightbox-figure { display: contents; }
 .lightbox-img {
   max-width: min(100%, 1100px);
   max-height: 100%;
@@ -1362,8 +1431,13 @@ section.block:first-of-type { border-top: none; }
 }
 
 /* ===== Responsive ===== */
+/* Between the nav breakpoint and 960px the full-size 92px logo (187px wide)
+   plus the long Greek nav labels overflow; shrink the logo so the desktop nav
+   still fits on landscape tablets instead of wrapping. */
+@media (min-width: 821px) and (max-width: 960px) {
+  .brand-logo { height: 72px; }
+}
 @media (max-width: 960px) {
-  .courses-grid { grid-template-columns: repeat(2, 1fr); }
   .course-body p { max-height: 220px; opacity: 1; } /* always show text on touch */
   .whyus-shell { grid-template-columns: 1fr; gap: 36px; }
   .contact-shell { grid-template-columns: 1fr; gap: 28px; }
@@ -1383,7 +1457,23 @@ section.block:first-of-type { border-top: none; }
 }
 @media (max-width: 560px) {
   .courses-grid { grid-template-columns: 1fr; }
-  .course-card { aspect-ratio: 16 / 11; }
+  /* Stack the course card (image over text on a light surface) instead of
+     overlaying text on a fixed-ratio box: at ≤~350px the overlaid copy was
+     taller than the box and clipped at the top. */
+  .course-card {
+    aspect-ratio: auto;
+    background: var(--surface);
+    border: 1px solid var(--line);
+  }
+  .course-media { position: relative; aspect-ratio: 16 / 10; }
+  .course-scrim { display: none; }
+  .course-body {
+    position: static;
+    padding: 16px 18px 20px;
+    color: var(--ink);
+  }
+  .course-body h3 { color: var(--ink); }
+  .course-body p { color: var(--muted); max-height: none; opacity: 1; }
   .carousel-viewport { aspect-ratio: 3 / 2; } /* landscape — shorter, less tall crop than square */
   .site-footer-inner { grid-template-columns: 1fr; gap: 28px; }
   .brand-logo { height: 74px; }
@@ -1396,8 +1486,50 @@ section.block:first-of-type { border-top: none; }
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+    animation-delay: 0.01ms !important;
     transition-duration: 0.01ms !important;
+    /* Also neutralise delays: the reveal system applies staggered inline
+       transition-delays, which otherwise leave cards at opacity:0 for up to
+       ~400ms before snapping in — flicker rather than motion-free. */
+    transition-delay: 0.01ms !important;
     scroll-behavior: auto !important;
   }
   .carousel-slide img { transform: none !important; }
+}
+
+/* ===== No-JS fallback ===== */
+.noscript-fallback {
+  max-width: 640px;
+  margin: 48px auto;
+  padding: 0 24px;
+  font-family: var(--font-sans);
+  color: var(--ink);
+  text-align: center;
+  line-height: 1.7;
+}
+.noscript-fallback h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(26px, 5vw, 38px);
+  color: var(--ink);
+  margin: 0 0 12px;
+}
+.noscript-fallback p { margin: 0 0 10px; }
+
+/* ===== Print ===== */
+@media print {
+  /* Reveal-on-scroll content the reader never scrolled past would otherwise
+     print blank. */
+  .reveal { opacity: 1 !important; transform: none !important; }
+  .site-header,
+  .mobile-backdrop,
+  .mobile-menu,
+  .nav-toggle,
+  .carousel-arrow,
+  .carousel-playpause,
+  .carousel-dots,
+  .contact-map,
+  .article-share { display: none !important; }
+  body { background: #fff; color: #000; }
+  a { color: #000; text-decoration: underline; }
+  main { max-width: none; margin: 0; padding: 0; }
 }

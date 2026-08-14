@@ -22,8 +22,6 @@ function HomeIntro() {
 
 // Two wide frames stacked one above the other — both keep their natural
 // landscape framing (no tall vertical crop that would lose the scene).
-// (misc-2 is the black-and-white shot, now reused as the news article cover,
-// so it is intentionally dropped here.)
 const WHYUS_PHOTOS = [
   { src: "/images/misc/misc-1.jpg", w: 800, h: 533 },
   { src: "/images/misc/misc-3.jpg", w: 800, h: 533 },
@@ -35,7 +33,7 @@ function WhyUs() {
     <section className="block" id="giati-emas">
       <SectionHeader center kicker="Η σχολή μας" title="Γιατί εμάς" />
       <div className="whyus-shell">
-        <ol className="whyus-points">
+        <ol className="whyus-points" role="list">
           {WHY_US.map((t, i) => (
             <li
               className={`whyus-point reveal ${visible.has(`why-${i}`) ? "in" : ""}`}
@@ -79,7 +77,7 @@ function Courses() {
             key={i}
           >
             <div className="course-media">
-              <Picture src={asset(c.image)} alt={c.alt} width="700" height="933" />
+              <Picture src={asset(c.image)} alt={c.alt} width="1400" height="875" />
             </div>
             <div className="course-scrim" aria-hidden="true" />
             <div className="course-body">
@@ -157,7 +155,7 @@ function Contact() {
             src={SITE.mapEmbed}
             title={`Χάρτης: ${SITE.address.street}, ${SITE.address.postalCode} ${SITE.address.area}`}
             loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
+            referrerPolicy="strict-origin-when-cross-origin"
             allowFullScreen
           />
         </div>

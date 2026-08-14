@@ -71,8 +71,9 @@ test("article meta matches article.js source", () => {
   assert.match(meta.image, /\?v=[0-9a-f]{8,}$/, "the ?v= token is a content hash");
   const article = meta.jsonLd["@graph"].find((n) => n["@type"] === "Article");
   assert.equal(article.headline, a.title);
-  assert.equal(article.datePublished, a.date);
-  assert.equal(article.dateModified, a.date);
+  // datePublished/dateModified carry the article date at a fixed Greek offset.
+  assert.equal(article.datePublished, `${a.date}T00:00:00+03:00`);
+  assert.equal(article.dateModified, `${a.date}T00:00:00+03:00`);
 });
 
 // ---- og:image:width/height are accurate per route --------------------------
@@ -100,8 +101,8 @@ test("JSON-LD Article is schema-correct", async () => {
   const block = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1];
   const graph = JSON.parse(block)["@graph"];
   const article = graph.find((n) => n["@type"] === "Article");
-  assert.match(article.datePublished, /^\d{4}-\d{2}-\d{2}$/);
-  assert.match(article.dateModified, /^\d{4}-\d{2}-\d{2}$/);
+  assert.match(article.datePublished, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/);
+  assert.match(article.dateModified, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/);
   assert.equal(article.author.name, SITE.name);
   assert.equal(article.publisher.name, SITE.name);
   assert.equal(article.inLanguage, "el");

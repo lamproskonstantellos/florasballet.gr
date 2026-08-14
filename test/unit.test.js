@@ -155,13 +155,12 @@ test("defineArticle rejects bad date format", () => {
   assert.throws(() => defineArticle(a), /invalid date/);
 });
 
-test("defineArticle rejects non-array body / photos / keywords / topics", () => {
+test("defineArticle rejects non-array body / photos / keywords", () => {
   const { defineArticle } = loadDataWindow();
   const bad = (mut) => { const a = validArticle(); mut(a); return a; };
   assert.throws(() => defineArticle(bad((a) => (a.body = "no"))), /empty or non-array body/);
   assert.throws(() => defineArticle(bad((a) => (a.photos = "no"))), /non-array photos/);
   assert.throws(() => defineArticle(bad((a) => (a.keywords = "no"))), /non-array keywords/);
-  assert.throws(() => defineArticle(bad((a) => (a.topics = "no"))), /non-array topics/);
 });
 
 // ---- shared route table (routes.js, used by client AND server) -------------

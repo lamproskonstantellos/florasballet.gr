@@ -6,7 +6,7 @@ const crypto = require("crypto");
 const { URL } = require("url");
 const SITE_CFG = require("./site.config.js");
 const { parseRoute, isValidSpaRoute: routeIsValidSpa, pageTitle } = require("./routes.js");
-const { validateArticle } = require("./article-schema.js");
+const { validateArticle, compareByDateDesc } = require("./article-schema.js");
 const { buildSitemap, buildRss, buildFeed } = require("./feeds.js");
 
 const PORT = process.env.PORT || 3000;
@@ -111,6 +111,55 @@ function imageVersion(absPath) {
   }
 }
 
+// The home page's canonical / og:url / sitemap <loc> all carry a trailing slash
+// ("https://florasballet.gr/"), so every JSON-LD reference to the home resource
+// must use the SAME spelling or the breadcrumb root fails to string-match the
+// page it points at. HOME_URL is that single spelling; ORG_ID/SITE_ID are stable
+// node identifiers so the DanceSchool, WebSite and per-article publisher/author
+// reconcile into one linked entity instead of three disconnected ones.
+const HOME_URL = `${SITE_CFG.url}/`;
+const ORG_ID = `${SITE_CFG.url}/#organization`;
+const SITE_ID = `${SITE_CFG.url}/#website`;
+
+// Local time zone offset for Greece (EET/EEST). Article dates are stored as bare
+// YYYY-MM-DD; stamping a fixed offset keeps datePublished/dateModified from
+// being interpreted in the crawler's own zone (which can shift the SERP date).
+const TZ_OFFSET = "+03:00";
+
+// Map a schema.org openingHours shorthand ("Mo-Fr 17:00-22:30") to an
+// OpeningHoursSpecification object, the form Google actually consumes for the
+// local-business rich result.
+const DAY_ORDER = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+const DAY_NAMES = {
+  Mo: "Monday", Tu: "Tuesday", We: "Wednesday", Th: "Thursday",
+  Fr: "Friday", Sa: "Saturday", Su: "Sunday",
+};
+function openingHoursSpec(shorthand) {
+  const [days, hours] = shorthand.split(" ");
+  const [opens, closes] = hours.split("-");
+  let codes;
+  if (days.includes("-")) {
+    const [a, b] = days.split("-");
+    codes = DAY_ORDER.slice(DAY_ORDER.indexOf(a), DAY_ORDER.indexOf(b) + 1);
+  } else {
+    codes = [days];
+  }
+  return {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": codes.map((c) => DAY_NAMES[c]),
+    "opens": opens,
+    "closes": closes,
+  };
+}
+
+// Strip the inline **bold** emphasis markers from body text before it goes into
+// machine-read surfaces (JSON-LD articleBody, JSON Feed content_text): the
+// browser renders ** as <strong>, so the markers never appear to a human and
+// must not appear in structured data or a plain-text feed either.
+function stripEmphasis(s) {
+  return String(s).replace(/\*\*([^*]+)\*\*/g, "$1");
+}
+
 const DEFAULT_IMAGE_PATH = path.join(PUBLIC_DIR, SITE_CFG.defaultImage.replace(/^\//, ""));
 const DEFAULT_IMAGE_VERSION = imageVersion(DEFAULT_IMAGE_PATH);
 const DEFAULT_IMAGE = `${SITE_CFG.url}${SITE_CFG.defaultImage}${DEFAULT_IMAGE_VERSION ? `?v=${DEFAULT_IMAGE_VERSION}` : ""}`;
@@ -128,15 +177,18 @@ const SCHOOL_JSONLD = {
   "@graph": [
     {
       "@type": "WebSite",
+      "@id": SITE_ID,
       "name": SITE_CFG.name,
-      "url": SITE_CFG.url,
+      "url": HOME_URL,
       "inLanguage": "el",
+      "publisher": { "@id": ORG_ID },
     },
     {
       "@type": ["DanceSchool", "LocalBusiness"],
+      "@id": ORG_ID,
       "name": SITE_CFG.name,
       "alternateName": SITE_CFG.shortName,
-      "url": SITE_CFG.url,
+      "url": HOME_URL,
       "image": DEFAULT_IMAGE,
       "logo": `${SITE_CFG.url}${SITE_CFG.logoOnWhite}`,
       "description": DEFAULT_DESCRIPTION,
@@ -158,7 +210,7 @@ const SCHOOL_JSONLD = {
       },
       "hasMap": `https://www.google.com/maps?q=${SITE_CFG.geo.lat},${SITE_CFG.geo.lng}`,
       "areaServed": "Αχαρνές, Αττική",
-      "openingHours": SITE_CFG.hours.map((h) => h.schema),
+      "openingHoursSpecification": SITE_CFG.hours.map((h) => openingHoursSpec(h.schema)),
       "sameAs": SITE_CFG.socialLinks,
     },
   ],
@@ -172,7 +224,7 @@ function breadcrumbJsonLd(label, urlPath) {
       {
         "@type": "BreadcrumbList",
         "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Αρχική", "item": SITE_CFG.url },
+          { "@type": "ListItem", "position": 1, "name": "Αρχική", "item": HOME_URL },
           { "@type": "ListItem", "position": 2, "name": label, "item": `${SITE_CFG.url}${urlPath}` },
         ],
       },
@@ -224,9 +276,12 @@ function jsonLdScript(obj) {
 
 // Built once at startup (article folders / asset map only change between deploys).
 const ARTICLE_SLUGS = discoverArticleSlugs();
-const ARTICLE_META = {};
-const ARTICLE_COVER_DIMS = {};
-const ARTICLE_COVER_VERSION = {};
+// Null-prototype maps: the request-derived slug indexes these directly
+// (computePageMeta), so an inherited key like "constructor" or "__proto__" must
+// not resolve to a truthy Object.prototype member and take the article branch.
+const ARTICLE_META = Object.create(null);
+const ARTICLE_COVER_DIMS = Object.create(null);
+const ARTICLE_COVER_VERSION = Object.create(null);
 for (const slug of ARTICLE_SLUGS) {
   const meta = loadArticleMeta(slug);
   ARTICLE_META[slug] = meta;
@@ -254,6 +309,21 @@ function escapeHtml(s) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
+
+// The no-JavaScript fallback shown inside <noscript>: the SPA renders nothing
+// without JS, so a visitor whose JS failed/blocked would otherwise see a blank
+// page. Built from site.config so it never drifts and index.html hardcodes no
+// identity. Route-independent (identity only).
+const NOSCRIPT_HTML =
+  `<div class="noscript-fallback">` +
+  `<h1>${escapeHtml(SITE_CFG.name)}</h1>` +
+  `<p>${escapeHtml(SITE_CFG.defaultDescription)}</p>` +
+  `<p><strong>Τηλέφωνα:</strong> ${SITE_CFG.phones.map((p) => escapeHtml(p.display)).join(" · ")}</p>` +
+  `<p><strong>Email:</strong> ${escapeHtml(SITE_CFG.email)}</p>` +
+  `<p><strong>Διεύθυνση:</strong> ${escapeHtml(SITE_CFG.address.street)}, ${escapeHtml(SITE_CFG.address.postalCode)} ${escapeHtml(SITE_CFG.address.area)}</p>` +
+  `<p><strong>Ώρες:</strong> ${SITE_CFG.hours.map((h) => escapeHtml(`${h.label} ${h.time}`)).join(" · ")}</p>` +
+  `<p>Για την πλήρη περιήγηση στον ιστότοπο απαιτείται JavaScript.</p>` +
+  `</div>`;
 
 // Static interior pages: label + description + breadcrumb, keyed by route.page.
 const STATIC_PAGES = {
@@ -291,7 +361,7 @@ const STATIC_PAGES = {
 
 function computePageMeta(pathname) {
   const route = parseRoute(pathname);
-  const titleCtx = { siteName: SITE_CFG.name, tagline: SITE_CFG.tagline };
+  const titleCtx = { siteName: SITE_CFG.name };
 
   if (route.page === "home") {
     return {
@@ -310,6 +380,22 @@ function computePageMeta(pathname) {
 
   const stat = STATIC_PAGES[route.page];
   if (stat) {
+    const jsonLd = breadcrumbJsonLd(stat.label, stat.path);
+    // /nea is a collection page: enumerate the articles (newest first) as an
+    // ItemList so the index is associated with the posts it lists and crawlers
+    // get an in-HTML list of article URLs the JS-free document otherwise lacks.
+    if (route.page === "news-list" && ARTICLES.length) {
+      const ordered = [...ARTICLES].sort(compareByDateDesc);
+      jsonLd["@graph"].push({
+        "@type": "ItemList",
+        "itemListElement": ordered.map((a, i) => ({
+          "@type": "ListItem",
+          "position": i + 1,
+          "url": `${SITE_CFG.url}/nea/${a.slug}`,
+          "name": a.title,
+        })),
+      });
+    }
     return {
       title: pageTitle(route, titleCtx),
       description: stat.description,
@@ -319,7 +405,7 @@ function computePageMeta(pathname) {
       imageHeight: DEFAULT_IMAGE_DIMS && DEFAULT_IMAGE_DIMS.height,
       imageAlt: SITE_CFG.name,
       ogType: "website",
-      jsonLd: breadcrumbJsonLd(stat.label, stat.path),
+      jsonLd,
     };
   }
 
@@ -332,21 +418,25 @@ function computePageMeta(pathname) {
         : DEFAULT_IMAGE;
       const imageDimensions = article.cover ? ARTICLE_COVER_DIMS[route.slug] : DEFAULT_IMAGE_DIMS;
 
-      const articleBody = Array.isArray(article.body) ? article.body.join("\n\n") : "";
+      const articleBody = Array.isArray(article.body)
+        ? stripEmphasis(article.body.join("\n\n"))
+        : "";
       const wordCount = articleBody ? articleBody.trim().split(/\s+/).length : 0;
+      const dateTime = `${article.date}T00:00:00${TZ_OFFSET}`;
 
       const articleSchema = {
         "@type": "Article",
         "headline": article.title,
         "description": article.excerpt,
         "image": image,
-        "datePublished": article.date,
-        "dateModified": article.date,
-        "author": { "@type": "Organization", "name": SITE_CFG.name, "url": SITE_CFG.url },
+        "datePublished": dateTime,
+        "dateModified": dateTime,
+        "author": { "@type": "Organization", "@id": ORG_ID, "name": SITE_CFG.name, "url": HOME_URL },
         "publisher": {
           "@type": "Organization",
+          "@id": ORG_ID,
           "name": SITE_CFG.name,
-          "url": SITE_CFG.url,
+          "url": HOME_URL,
           "logo": { "@type": "ImageObject", "url": `${SITE_CFG.url}${SITE_CFG.logoOnWhite}` },
         },
         "mainEntityOfPage": `${SITE_CFG.url}/nea/${article.slug}`,
@@ -364,11 +454,25 @@ function computePageMeta(pathname) {
       const breadcrumbs = {
         "@type": "BreadcrumbList",
         "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Αρχική", "item": SITE_CFG.url },
+          { "@type": "ListItem", "position": 1, "name": "Αρχική", "item": HOME_URL },
           { "@type": "ListItem", "position": 2, "name": "Νέα & Ανακοινώσεις", "item": `${SITE_CFG.url}/nea` },
           { "@type": "ListItem", "position": 3, "name": article.title, "item": `${SITE_CFG.url}/nea/${article.slug}` },
         ],
       };
+
+      // Open Graph `article` object properties — the timestamp, section and tags
+      // that Facebook/LinkedIn/Slack render on the unfurl card. Every value is
+      // already in the JSON-LD on the same page; this just exposes it to OG.
+      const articleTagLines = [
+        `<meta property="article:published_time" content="${escapeHtml(dateTime)}" />`,
+        `<meta property="article:modified_time" content="${escapeHtml(dateTime)}" />`,
+      ];
+      if (article.articleSection) {
+        articleTagLines.push(`<meta property="article:section" content="${escapeHtml(article.articleSection)}" />`);
+      }
+      for (const kw of article.keywords || []) {
+        articleTagLines.push(`<meta property="article:tag" content="${escapeHtml(kw)}" />`);
+      }
 
       return {
         title: pageTitle(route, { ...titleCtx, articleTitle: article.title }),
@@ -379,6 +483,7 @@ function computePageMeta(pathname) {
         imageHeight: imageDimensions && imageDimensions.height,
         imageAlt: article.title,
         ogType: "article",
+        articleTags: articleTagLines.join("\n"),
         jsonLd: {
           "@context": "https://schema.org",
           "@graph": [breadcrumbs, articleSchema],
@@ -403,7 +508,15 @@ function computePageMeta(pathname) {
 }
 
 function parseRequestUrl(req) {
-  return new URL(req.url || "/", "http://localhost");
+  // Build the URL by concatenation, not the (input, base) form: the base form
+  // treats an origin-form target that begins with two slashes (e.g. "//nea") as
+  // a protocol-relative reference, moving the first path segment into the host
+  // and dropping it from the pathname. Collapse leading slashes and prefix the
+  // origin so "//nea" stays "/nea" and the query string is preserved.
+  let target = req.url || "/";
+  if (target[0] !== "/") target = "/" + target;
+  target = target.replace(/^\/+/, "/");
+  return new URL("http://localhost" + target);
 }
 
 function cacheHeaderFor(req, contentType) {
@@ -493,7 +606,12 @@ function writeCompressed(req, res, headers, data, cacheKey) {
     }
   }
 
-  res.writeHead(status, { ...headers, "Content-Length": buf.length });
+  // Content-negotiated resources must carry Vary even when served uncompressed
+  // (body ≤1024 bytes, or the client sent no Accept-Encoding), so a shared cache
+  // does not reuse an identity body for a client that would accept br/gzip.
+  const baseHeaders = { ...headers, "Content-Length": buf.length };
+  if (isCompressible(ct)) baseHeaders["Vary"] = "Accept-Encoding";
+  res.writeHead(status, baseHeaders);
   res.end(isHead ? undefined : buf);
 }
 
@@ -502,26 +620,43 @@ function isValidSpaRoute(pathname) {
 }
 
 // Replace the __META_*__ placeholders in index.html with per-route values.
-// Every replacement uses a FUNCTION value, not a string, so a $-sequence in the
-// injected meta (e.g. an article title containing "$&") is inserted verbatim.
+// A SINGLE pass over the template: each token is resolved from `values` via a
+// function (so a $-sequence in the injected meta, e.g. an article title with
+// "$&", is inserted verbatim), and — critically — a value injected by one token
+// is never re-scanned for another token. A sequential chain of .replace() calls
+// would let an early value that happens to contain a literal later token
+// (e.g. "__META_JSONLD__") be substituted by the later pass, emitting raw markup
+// into an attribute; the single pass closes that second-order injection.
 function injectMeta(html, meta) {
-  return html
-    .replace(/__META_SITE_NAME__/g, () => escapeHtml(SITE_CFG.name))
-    .replace(/__META_TITLE__/g, () => escapeHtml(meta.title))
-    .replace(/__META_DESCRIPTION__/g, () => escapeHtml(meta.description))
-    .replace(/__META_URL__/g, () => escapeHtml(meta.url))
-    .replace(/__META_IMAGE__/g, () => escapeHtml(meta.image))
-    .replace(/__META_IMAGE_DIMS__/g, () =>
+  const values = {
+    SITE_NAME: () => escapeHtml(SITE_CFG.name),
+    TITLE: () => escapeHtml(meta.title),
+    DESCRIPTION: () => escapeHtml(meta.description),
+    URL: () => escapeHtml(meta.url),
+    IMAGE: () => escapeHtml(meta.image),
+    IMAGE_DIMS: () =>
       meta.imageWidth && meta.imageHeight
         ? `<meta property="og:image:width" content="${meta.imageWidth}" />\n` +
           `<meta property="og:image:height" content="${meta.imageHeight}" />`
-        : "")
-    .replace(/__META_IMAGE_ALT__/g, () => escapeHtml(meta.imageAlt || meta.title))
-    .replace(/__META_OG_TYPE__/g, () => escapeHtml(meta.ogType))
-    .replace(/__META_JSONLD__/g, () => (meta.jsonLd ? jsonLdScript(meta.jsonLd) : ""))
-    .replace(/__META_PRELOAD__/g, () => meta.preloadImage
+        : "",
+    IMAGE_ALT: () => escapeHtml(meta.imageAlt || meta.title),
+    OG_TYPE: () => escapeHtml(meta.ogType),
+    ARTICLE_TAGS: () => (meta.articleTags ? meta.articleTags : ""),
+    NOSCRIPT: () => NOSCRIPT_HTML,
+    // Emit the whole <script> element only when there is a graph, so routes
+    // with no structured data (the 404 page) ship no empty ld+json block for a
+    // validator to choke on.
+    JSONLD: () =>
+      meta.jsonLd
+        ? `<script type="application/ld+json">${jsonLdScript(meta.jsonLd)}</script>`
+        : "",
+    PRELOAD: () => meta.preloadImage
       ? `<link rel="preload" as="image" href="${escapeHtml(meta.preloadImage)}" type="image/avif" fetchpriority="high" />`
-      : "");
+      : "",
+  };
+  return html.replace(/__META_([A-Z_]+)__/g, (m, key) =>
+    Object.prototype.hasOwnProperty.call(values, key) ? values[key]() : m
+  );
 }
 
 // Render the served HTML for a path from index.html. The SINGLE source of truth
@@ -655,6 +790,10 @@ const SECURITY_HEADERS = {
   "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=(), interest-cohort=(), browsing-topics=()",
   "Cross-Origin-Opener-Policy": "same-origin",
+  // Block other origins from embedding the site's images (the performance/class
+  // photographs, many depicting minors, that the licence forbids reusing). Only
+  // stops hotlinking/no-cors embedding, not server-side re-hosting.
+  "Cross-Origin-Resource-Policy": "same-origin",
   "Content-Security-Policy": [
     "default-src 'self'",
     "script-src 'self'",
@@ -690,9 +829,16 @@ function isPrivatePath(pathname) {
   if (PRIVATE_PATHS.has(pathname)) return true;
   if (pathname.startsWith("/scripts/")) return true;     // build tooling
   if (pathname.startsWith("/test/")) return true;        // test suite
+  if (pathname.startsWith("/components/")) return true;  // JSX source (compiled into /dist)
+  if (pathname.startsWith("/node_modules/")) return true;// installed dependencies
+  if (pathname.startsWith("/build/")) return true;       // generated static build output
+  if (pathname.startsWith("/scratch/")) return true;     // local scratch (gitignored)
   if (pathname.startsWith("/archive/")) return true;     // archived project material
   if (pathname.startsWith("/trash/")) return true;       // original masters
   if (pathname.startsWith("/palette/")) return true;     // design tokens
+  if (pathname.startsWith("/_reference/")) return true;  // reference screenshots
+  if (pathname.endsWith(".jsx")) return true;            // JSX source (app.jsx, icons.jsx)
+  if (pathname.endsWith(".md")) return true;             // docs (README, briefs)
   if (pathname.endsWith(".docx")) return true;           // content brief
   if (/\/\.[^/]/.test(pathname)) return true;            // dotfiles (.git, .DS_Store, ...)
   return false;
@@ -716,7 +862,8 @@ const server = http.createServer((req, res) => {
 
   try {
     if (req.method === "OPTIONS") {
-      res.writeHead(204, { "Allow": ALLOWED_METHODS, "Content-Length": 0 });
+      // RFC 9110 §6.4.1 / RFC 9112: a 204 response must carry no Content-Length.
+      res.writeHead(204, { "Allow": ALLOWED_METHODS });
       res.end();
       return;
     }
@@ -863,8 +1010,6 @@ module.exports = {
   discoverArticleSlugs,
   VALID_ARTICLE_SLUGS,
   SECURITY_HEADERS,
-  isPrivatePath,
-  DEPLOY_VERSION,
   ARTICLES,
   ARTICLE_SCRIPTS,
   ASSET_MAP,
