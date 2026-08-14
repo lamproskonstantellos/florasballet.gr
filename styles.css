@@ -480,6 +480,10 @@ section.block:first-of-type { border-top: none; }
   display: flex;
   justify-content: center;
   gap: 4px;
+  /* The row spans the full width but the dots are centered; make the empty
+     track click-through so it does not sit over the play/pause button and the
+     arrows in the bottom corners. The dots re-enable pointer events below. */
+  pointer-events: none;
 }
 /* The button is a 24px transparent hit target (WCAG 2.5.8) with the 9px visual
    dot drawn as ::before, so the touch affordance is large without changing the
@@ -497,6 +501,7 @@ section.block:first-of-type { border-top: none; }
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  pointer-events: auto;
 }
 .carousel-dot::before {
   content: "";
