@@ -98,7 +98,10 @@ h1, h2, h3, h4 { font-family: var(--font-serif); }
   position: sticky;
   top: 0;
   z-index: 80;
-  background: rgba(255, 247, 250, 0.82);
+  /* Near-opaque: at 0.82 the muted nav links dropped below AA contrast when
+     dark page content (carousel, course cards, footer) scrolled beneath the
+     translucent, position:sticky header. */
+  background: rgba(255, 247, 250, 0.95);
   backdrop-filter: saturate(150%) blur(12px);
   -webkit-backdrop-filter: saturate(150%) blur(12px);
   border-bottom: 1px solid var(--line);
@@ -211,7 +214,9 @@ h1, h2, h3, h4 { font-family: var(--font-serif); }
 .dropdown-menu a:hover,
 .dropdown-menu a.active {
   background: var(--cream);
-  color: var(--accent);
+  /* --accent on --cream is 4.50:1, right on the AA edge; --accent-hover clears
+     it (6.4:1) for this persistent active state. */
+  color: var(--accent-hover);
 }
 
 .nav-cta {
@@ -298,7 +303,7 @@ h1, h2, h3, h4 { font-family: var(--font-serif); }
   border-bottom: 1px solid var(--line-soft);
 }
 .mobile-link:hover,
-.mobile-sub-trigger:hover { color: var(--accent); background: var(--cream); }
+.mobile-sub-trigger:hover { color: var(--accent-hover); background: var(--cream); }
 .mobile-link.active { color: var(--accent); }
 .mobile-sub-trigger .chev { transition: transform var(--transition); }
 .mobile-sub-trigger[aria-expanded="true"] .chev { transform: rotate(180deg); }
@@ -468,26 +473,85 @@ section.block:first-of-type { border-top: none; }
 .carousel-dots {
   position: absolute;
   z-index: 4;
-  left: 0; right: 0; bottom: 20px;
+  left: 0; right: 0; bottom: 16px;
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 4px;
 }
+/* The button is a 24px transparent hit target (WCAG 2.5.8) with the 9px visual
+   dot drawn as ::before, so the touch affordance is large without changing the
+   design. A dark drop-shadow ring keeps the dot and its active/inactive state
+   distinguishable over bright slide imagery (WCAG 1.4.11). */
 .carousel-dot {
-  width: 9px;
-  height: 9px;
+  width: 24px;
+  height: 24px;
   padding: 0;
   -webkit-appearance: none;
   appearance: none;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  transition: all var(--transition);
+  background: none;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
-.carousel-dot:hover { background: rgba(255, 255, 255, 0.85); }
-.carousel-dot.active {
-  /* Active dot stays a round circle, simply filled white (no elongated pill). */
-  background: #fff;
+.carousel-dot::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 0 1px rgba(40, 18, 26, 0.35), 0 1px 2px rgba(40, 18, 26, 0.45);
+  transition: background var(--transition), transform var(--transition);
+}
+.carousel-dot:hover::before { background: rgba(255, 255, 255, 0.9); }
+.carousel-dot.active::before { background: #fff; transform: scale(1.15); }
+.carousel-dot:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 0;
+  border-radius: 50%;
+}
+
+/* Prev/next arrows and the play/pause toggle — persistent pointer controls the
+   carousel previously lacked (WCAG 2.2.2). White focus ring so it is visible on
+   the photographic backdrop. */
+.carousel-arrow,
+.carousel-playpause {
+  position: absolute;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: rgba(40, 18, 26, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  transition: background var(--transition);
+}
+.carousel-arrow:hover,
+.carousel-playpause:hover { background: rgba(40, 18, 26, 0.62); }
+.carousel-arrow:focus-visible,
+.carousel-playpause:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.carousel-arrow {
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+}
+.carousel-prev { left: 16px; }
+.carousel-next { right: 16px; }
+.carousel-playpause {
+  right: 16px;
+  bottom: 14px;
+  width: 40px;
+  height: 40px;
+}
+@media (max-width: 560px) {
+  .carousel-arrow { width: 38px; height: 38px; }
+  .carousel-prev { left: 8px; }
+  .carousel-next { right: 8px; }
+  .carousel-playpause { width: 36px; height: 36px; right: 10px; }
 }
 
 /* ===== Home title block ===== */
@@ -1396,7 +1460,12 @@ section.block:first-of-type { border-top: none; }
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+    animation-delay: 0.01ms !important;
     transition-duration: 0.01ms !important;
+    /* Also neutralise delays: the reveal system applies staggered inline
+       transition-delays, which otherwise leave cards at opacity:0 for up to
+       ~400ms before snapping in — flicker rather than motion-free. */
+    transition-delay: 0.01ms !important;
     scroll-behavior: auto !important;
   }
   .carousel-slide img { transform: none !important; }

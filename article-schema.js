@@ -82,14 +82,17 @@
         }
       }
     }
-    // A photos entry is either a path string or { src, align? }.
+    // A photos entry is either a path string or { src, alt?, align? } — an
+    // author-supplied alt (when present) must be a string.
     if (Array.isArray(article.photos)) {
       for (const p of article.photos) {
         const ok =
-          typeof p === "string" || (p && typeof p === "object" && typeof p.src === "string");
+          typeof p === "string" ||
+          (p && typeof p === "object" && typeof p.src === "string" &&
+            (p.alt === undefined || typeof p.alt === "string"));
         if (!ok) {
           throw new Error(
-            `[article] "${article.slug}" has an invalid photos entry (expected a path string or { src })`
+            `[article] "${article.slug}" has an invalid photos entry (expected a path string or { src, alt? })`
           );
         }
       }

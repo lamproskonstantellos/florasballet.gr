@@ -27,12 +27,12 @@ function CompetitionsPage() {
           data-reveal={`year-${yi}`}
           key={y.year}
         >
-          <div className="comp-year-label">{y.year}</div>
+          <h2 className="comp-year-label">{y.year}</h2>
           <div className="comp-events">
             {y.events.map((ev, ei) => (
               <div className="comp-event" key={ei}>
-                <h2 className="comp-event-name">{ev.name}</h2>
-                <ul className="comp-results">
+                <h3 className="comp-event-name">{ev.name}</h3>
+                <ul className="comp-results" role="list">
                   {ev.results.map((r, ri) => (
                     <li key={ri}>{r}</li>
                   ))}

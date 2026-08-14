@@ -35,7 +35,7 @@ function WhyUs() {
     <section className="block" id="giati-emas">
       <SectionHeader center kicker="Η σχολή μας" title="Γιατί εμάς" />
       <div className="whyus-shell">
-        <ol className="whyus-points">
+        <ol className="whyus-points" role="list">
           {WHY_US.map((t, i) => (
             <li
               className={`whyus-point reveal ${visible.has(`why-${i}`) ? "in" : ""}`}
