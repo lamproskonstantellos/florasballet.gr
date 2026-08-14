@@ -160,14 +160,15 @@ function Lightbox({ src, alt, onClose }) {
       >
         ×
       </button>
-      <img
-        className="lightbox-img"
-        src={src}
-        alt={alt || ""}
-        loading="eager"
-        decoding="async"
-        onClick={(e) => e.stopPropagation()}
-      />
+      <div className="lightbox-figure" onClick={(e) => e.stopPropagation()}>
+        <Picture
+          className="lightbox-img"
+          src={src}
+          alt={alt || ""}
+          loading="eager"
+          decoding="async"
+        />
+      </div>
     </div>
   );
 }

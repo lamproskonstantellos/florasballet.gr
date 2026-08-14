@@ -79,7 +79,7 @@ function Courses() {
             key={i}
           >
             <div className="course-media">
-              <Picture src={asset(c.image)} alt={c.alt} width="700" height="933" />
+              <Picture src={asset(c.image)} alt={c.alt} width="1400" height="875" />
             </div>
             <div className="course-scrim" aria-hidden="true" />
             <div className="course-body">
@@ -157,7 +157,7 @@ function Contact() {
             src={SITE.mapEmbed}
             title={`Χάρτης: ${SITE.address.street}, ${SITE.address.postalCode} ${SITE.address.area}`}
             loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
+            referrerPolicy="strict-origin-when-cross-origin"
             allowFullScreen
           />
         </div>

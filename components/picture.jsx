@@ -18,6 +18,9 @@ function Picture({
   loading = "lazy",
   decoding = "async",
   fetchPriority,
+  // `sizes` is intentionally not forwarded: it is only valid alongside a
+  // width-descriptor srcset, which this single-candidate <picture> has none of,
+  // so applying it to the <img> is an HTML validation error with no effect.
   sizes,
   className,
 }) {
@@ -41,7 +44,6 @@ function Picture({
         loading={loading}
         decoding={decoding}
         fetchPriority={fetchPriority}
-        sizes={sizes}
         className={className}
       />
     </picture>

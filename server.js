@@ -310,6 +310,21 @@ function escapeHtml(s) {
     .replace(/'/g, "&#39;");
 }
 
+// The no-JavaScript fallback shown inside <noscript>: the SPA renders nothing
+// without JS, so a visitor whose JS failed/blocked would otherwise see a blank
+// page. Built from site.config so it never drifts and index.html hardcodes no
+// identity. Route-independent (identity only).
+const NOSCRIPT_HTML =
+  `<div class="noscript-fallback">` +
+  `<h1>${escapeHtml(SITE_CFG.name)}</h1>` +
+  `<p>${escapeHtml(SITE_CFG.defaultDescription)}</p>` +
+  `<p><strong>Τηλέφωνα:</strong> ${SITE_CFG.phones.map((p) => escapeHtml(p.display)).join(" · ")}</p>` +
+  `<p><strong>Email:</strong> ${escapeHtml(SITE_CFG.email)}</p>` +
+  `<p><strong>Διεύθυνση:</strong> ${escapeHtml(SITE_CFG.address.street)}, ${escapeHtml(SITE_CFG.address.postalCode)} ${escapeHtml(SITE_CFG.address.area)}</p>` +
+  `<p><strong>Ώρες:</strong> ${SITE_CFG.hours.map((h) => escapeHtml(`${h.label} ${h.time}`)).join(" · ")}</p>` +
+  `<p>Για την πλήρη περιήγηση στον ιστότοπο απαιτείται JavaScript.</p>` +
+  `</div>`;
+
 // Static interior pages: label + description + breadcrumb, keyed by route.page.
 const STATIC_PAGES = {
   school: {
@@ -627,6 +642,7 @@ function injectMeta(html, meta) {
     IMAGE_ALT: () => escapeHtml(meta.imageAlt || meta.title),
     OG_TYPE: () => escapeHtml(meta.ogType),
     ARTICLE_TAGS: () => (meta.articleTags ? meta.articleTags : ""),
+    NOSCRIPT: () => NOSCRIPT_HTML,
     // Emit the whole <script> element only when there is a graph, so routes
     // with no structured data (the 404 page) ship no empty ld+json block for a
     // validator to choke on.

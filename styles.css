@@ -89,6 +89,7 @@ body {
 a { color: var(--accent); text-decoration: none; transition: color var(--transition); }
 a:hover { color: var(--accent-hover); }
 img { max-width: 100%; display: block; }
+video, iframe { max-width: 100%; }
 button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
 
 h1, h2, h3, h4 { font-family: var(--font-serif); }
@@ -733,7 +734,9 @@ section.block:first-of-type { border-top: none; }
 /* ===== News (cards / grids) ===== */
 .news-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  /* min(290px, 100%) so a single column can shrink below 290px instead of
+     overflowing the content box (horizontal page scroll at ≤329px viewports). */
+  grid-template-columns: repeat(auto-fill, minmax(min(290px, 100%), 1fr));
   gap: 20px;
 }
 .news-card {
@@ -742,7 +745,7 @@ section.block:first-of-type { border-top: none; }
   border-radius: var(--radius-md);
   overflow: hidden;
   cursor: pointer;
-  transition: all var(--transition);
+  transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
   display: flex;
   flex-direction: column;
 }
@@ -767,7 +770,6 @@ section.block:first-of-type { border-top: none; }
 }
 .news-card .cover img { width: 100%; height: 100%; object-fit: cover; transition: transform 700ms cubic-bezier(.2, .7, .2, 1); }
 .news-card:hover .cover img { transform: scale(1.05); }
-.news-card .cover.cover-align-top img { object-position: top center; }
 .news-card .body { padding: 20px 22px 22px; flex: 1; display: flex; flex-direction: column; }
 .news-card .meta {
   font-family: var(--font-sans);
@@ -1162,6 +1164,7 @@ section.block:first-of-type { border-top: none; }
   animation: lightbox-in 180ms ease-out;
 }
 @keyframes lightbox-in { from { opacity: 0; } to { opacity: 1; } }
+.lightbox-figure { display: contents; }
 .lightbox-img {
   max-width: min(100%, 1100px);
   max-height: 100%;
@@ -1428,8 +1431,13 @@ section.block:first-of-type { border-top: none; }
 }
 
 /* ===== Responsive ===== */
+/* Between the nav breakpoint and 960px the full-size 92px logo (187px wide)
+   plus the long Greek nav labels overflow; shrink the logo so the desktop nav
+   still fits on landscape tablets instead of wrapping. */
+@media (min-width: 821px) and (max-width: 960px) {
+  .brand-logo { height: 72px; }
+}
 @media (max-width: 960px) {
-  .courses-grid { grid-template-columns: repeat(2, 1fr); }
   .course-body p { max-height: 220px; opacity: 1; } /* always show text on touch */
   .whyus-shell { grid-template-columns: 1fr; gap: 36px; }
   .contact-shell { grid-template-columns: 1fr; gap: 28px; }
@@ -1449,7 +1457,23 @@ section.block:first-of-type { border-top: none; }
 }
 @media (max-width: 560px) {
   .courses-grid { grid-template-columns: 1fr; }
-  .course-card { aspect-ratio: 16 / 11; }
+  /* Stack the course card (image over text on a light surface) instead of
+     overlaying text on a fixed-ratio box: at ≤~350px the overlaid copy was
+     taller than the box and clipped at the top. */
+  .course-card {
+    aspect-ratio: auto;
+    background: var(--surface);
+    border: 1px solid var(--line);
+  }
+  .course-media { position: relative; aspect-ratio: 16 / 10; }
+  .course-scrim { display: none; }
+  .course-body {
+    position: static;
+    padding: 16px 18px 20px;
+    color: var(--ink);
+  }
+  .course-body h3 { color: var(--ink); }
+  .course-body p { color: var(--muted); max-height: none; opacity: 1; }
   .carousel-viewport { aspect-ratio: 3 / 2; } /* landscape — shorter, less tall crop than square */
   .site-footer-inner { grid-template-columns: 1fr; gap: 28px; }
   .brand-logo { height: 74px; }
@@ -1471,4 +1495,41 @@ section.block:first-of-type { border-top: none; }
     scroll-behavior: auto !important;
   }
   .carousel-slide img { transform: none !important; }
+}
+
+/* ===== No-JS fallback ===== */
+.noscript-fallback {
+  max-width: 640px;
+  margin: 48px auto;
+  padding: 0 24px;
+  font-family: var(--font-sans);
+  color: var(--ink);
+  text-align: center;
+  line-height: 1.7;
+}
+.noscript-fallback h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(26px, 5vw, 38px);
+  color: var(--ink);
+  margin: 0 0 12px;
+}
+.noscript-fallback p { margin: 0 0 10px; }
+
+/* ===== Print ===== */
+@media print {
+  /* Reveal-on-scroll content the reader never scrolled past would otherwise
+     print blank. */
+  .reveal { opacity: 1 !important; transform: none !important; }
+  .site-header,
+  .mobile-backdrop,
+  .mobile-menu,
+  .nav-toggle,
+  .carousel-arrow,
+  .carousel-playpause,
+  .carousel-dots,
+  .contact-map,
+  .article-share { display: none !important; }
+  body { background: #fff; color: #000; }
+  a { color: #000; text-decoration: underline; }
+  main { max-width: none; margin: 0; padding: 0; }
 }
