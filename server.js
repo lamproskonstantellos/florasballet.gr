@@ -7,7 +7,7 @@ const { URL } = require("url");
 const SITE_CFG = require("./site.config.js");
 const { parseRoute, isValidSpaRoute: routeIsValidSpa, pageTitle } = require("./routes.js");
 const { validateArticle, compareByDateDesc } = require("./article-schema.js");
-const { buildSitemap, buildRss, buildFeed } = require("./feeds.js");
+const { buildSitemap, buildRss, buildFeed, buildLlmsTxt } = require("./feeds.js");
 const { renderStaticBody, loadContentData } = require("./static-html.js");
 
 const PORT = process.env.PORT || 3000;
@@ -980,6 +980,15 @@ const server = http.createServer((req, res) => {
         "Content-Type": "application/rss+xml; charset=utf-8",
         "Cache-Control": "public, max-age=3600",
       }, xml, "feed:rss");
+      return;
+    }
+
+    if (urlPathname === "/llms.txt") {
+      const txt = buildLlmsTxt({ articles: ARTICLES, siteCfg: SITE_CFG, data: CONTENT_DATA });
+      writeCompressed(req, res, {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "public, max-age=3600",
+      }, txt, "feed:llms");
       return;
     }
 

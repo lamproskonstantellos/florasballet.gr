@@ -69,6 +69,7 @@ const FEEDS = [
   ["/sitemap.xml", "sitemap.xml"],
   ["/rss.xml", "rss.xml"],
   ["/feed.json", "feed.json"],
+  ["/llms.txt", "llms.txt"],
 ];
 
 for (const [routePath, buildRel] of FEEDS) {
