@@ -127,6 +127,7 @@ test("security header set", async () => {
     "strict-transport-security",
     "permissions-policy",
     "cross-origin-opener-policy",
+    "cross-origin-resource-policy",
     "content-security-policy",
   ]) {
     picked[k] = res.headers[k];

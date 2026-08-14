@@ -224,9 +224,12 @@ function jsonLdScript(obj) {
 
 // Built once at startup (article folders / asset map only change between deploys).
 const ARTICLE_SLUGS = discoverArticleSlugs();
-const ARTICLE_META = {};
-const ARTICLE_COVER_DIMS = {};
-const ARTICLE_COVER_VERSION = {};
+// Null-prototype maps: the request-derived slug indexes these directly
+// (computePageMeta), so an inherited key like "constructor" or "__proto__" must
+// not resolve to a truthy Object.prototype member and take the article branch.
+const ARTICLE_META = Object.create(null);
+const ARTICLE_COVER_DIMS = Object.create(null);
+const ARTICLE_COVER_VERSION = Object.create(null);
 for (const slug of ARTICLE_SLUGS) {
   const meta = loadArticleMeta(slug);
   ARTICLE_META[slug] = meta;
@@ -403,7 +406,15 @@ function computePageMeta(pathname) {
 }
 
 function parseRequestUrl(req) {
-  return new URL(req.url || "/", "http://localhost");
+  // Build the URL by concatenation, not the (input, base) form: the base form
+  // treats an origin-form target that begins with two slashes (e.g. "//nea") as
+  // a protocol-relative reference, moving the first path segment into the host
+  // and dropping it from the pathname. Collapse leading slashes and prefix the
+  // origin so "//nea" stays "/nea" and the query string is preserved.
+  let target = req.url || "/";
+  if (target[0] !== "/") target = "/" + target;
+  target = target.replace(/^\/+/, "/");
+  return new URL("http://localhost" + target);
 }
 
 function cacheHeaderFor(req, contentType) {
@@ -493,7 +504,12 @@ function writeCompressed(req, res, headers, data, cacheKey) {
     }
   }
 
-  res.writeHead(status, { ...headers, "Content-Length": buf.length });
+  // Content-negotiated resources must carry Vary even when served uncompressed
+  // (body ≤1024 bytes, or the client sent no Accept-Encoding), so a shared cache
+  // does not reuse an identity body for a client that would accept br/gzip.
+  const baseHeaders = { ...headers, "Content-Length": buf.length };
+  if (isCompressible(ct)) baseHeaders["Vary"] = "Accept-Encoding";
+  res.writeHead(status, baseHeaders);
   res.end(isHead ? undefined : buf);
 }
 
@@ -502,26 +518,36 @@ function isValidSpaRoute(pathname) {
 }
 
 // Replace the __META_*__ placeholders in index.html with per-route values.
-// Every replacement uses a FUNCTION value, not a string, so a $-sequence in the
-// injected meta (e.g. an article title containing "$&") is inserted verbatim.
+// A SINGLE pass over the template: each token is resolved from `values` via a
+// function (so a $-sequence in the injected meta, e.g. an article title with
+// "$&", is inserted verbatim), and — critically — a value injected by one token
+// is never re-scanned for another token. A sequential chain of .replace() calls
+// would let an early value that happens to contain a literal later token
+// (e.g. "__META_JSONLD__") be substituted by the later pass, emitting raw markup
+// into an attribute; the single pass closes that second-order injection.
 function injectMeta(html, meta) {
-  return html
-    .replace(/__META_SITE_NAME__/g, () => escapeHtml(SITE_CFG.name))
-    .replace(/__META_TITLE__/g, () => escapeHtml(meta.title))
-    .replace(/__META_DESCRIPTION__/g, () => escapeHtml(meta.description))
-    .replace(/__META_URL__/g, () => escapeHtml(meta.url))
-    .replace(/__META_IMAGE__/g, () => escapeHtml(meta.image))
-    .replace(/__META_IMAGE_DIMS__/g, () =>
+  const values = {
+    SITE_NAME: () => escapeHtml(SITE_CFG.name),
+    TITLE: () => escapeHtml(meta.title),
+    DESCRIPTION: () => escapeHtml(meta.description),
+    URL: () => escapeHtml(meta.url),
+    IMAGE: () => escapeHtml(meta.image),
+    IMAGE_DIMS: () =>
       meta.imageWidth && meta.imageHeight
         ? `<meta property="og:image:width" content="${meta.imageWidth}" />\n` +
           `<meta property="og:image:height" content="${meta.imageHeight}" />`
-        : "")
-    .replace(/__META_IMAGE_ALT__/g, () => escapeHtml(meta.imageAlt || meta.title))
-    .replace(/__META_OG_TYPE__/g, () => escapeHtml(meta.ogType))
-    .replace(/__META_JSONLD__/g, () => (meta.jsonLd ? jsonLdScript(meta.jsonLd) : ""))
-    .replace(/__META_PRELOAD__/g, () => meta.preloadImage
+        : "",
+    IMAGE_ALT: () => escapeHtml(meta.imageAlt || meta.title),
+    OG_TYPE: () => escapeHtml(meta.ogType),
+    ARTICLE_TAGS: () => (meta.articleTags ? meta.articleTags : ""),
+    JSONLD: () => (meta.jsonLd ? jsonLdScript(meta.jsonLd) : ""),
+    PRELOAD: () => meta.preloadImage
       ? `<link rel="preload" as="image" href="${escapeHtml(meta.preloadImage)}" type="image/avif" fetchpriority="high" />`
-      : "");
+      : "",
+  };
+  return html.replace(/__META_([A-Z_]+)__/g, (m, key) =>
+    Object.prototype.hasOwnProperty.call(values, key) ? values[key]() : m
+  );
 }
 
 // Render the served HTML for a path from index.html. The SINGLE source of truth
@@ -655,6 +681,10 @@ const SECURITY_HEADERS = {
   "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=(), interest-cohort=(), browsing-topics=()",
   "Cross-Origin-Opener-Policy": "same-origin",
+  // Block other origins from embedding the site's images (the performance/class
+  // photographs, many depicting minors, that the licence forbids reusing). Only
+  // stops hotlinking/no-cors embedding, not server-side re-hosting.
+  "Cross-Origin-Resource-Policy": "same-origin",
   "Content-Security-Policy": [
     "default-src 'self'",
     "script-src 'self'",
@@ -690,9 +720,16 @@ function isPrivatePath(pathname) {
   if (PRIVATE_PATHS.has(pathname)) return true;
   if (pathname.startsWith("/scripts/")) return true;     // build tooling
   if (pathname.startsWith("/test/")) return true;        // test suite
+  if (pathname.startsWith("/components/")) return true;  // JSX source (compiled into /dist)
+  if (pathname.startsWith("/node_modules/")) return true;// installed dependencies
+  if (pathname.startsWith("/build/")) return true;       // generated static build output
+  if (pathname.startsWith("/scratch/")) return true;     // local scratch (gitignored)
   if (pathname.startsWith("/archive/")) return true;     // archived project material
   if (pathname.startsWith("/trash/")) return true;       // original masters
   if (pathname.startsWith("/palette/")) return true;     // design tokens
+  if (pathname.startsWith("/_reference/")) return true;  // reference screenshots
+  if (pathname.endsWith(".jsx")) return true;            // JSX source (app.jsx, icons.jsx)
+  if (pathname.endsWith(".md")) return true;             // docs (README, briefs)
   if (pathname.endsWith(".docx")) return true;           // content brief
   if (/\/\.[^/]/.test(pathname)) return true;            // dotfiles (.git, .DS_Store, ...)
   return false;
@@ -716,7 +753,8 @@ const server = http.createServer((req, res) => {
 
   try {
     if (req.method === "OPTIONS") {
-      res.writeHead(204, { "Allow": ALLOWED_METHODS, "Content-Length": 0 });
+      // RFC 9110 §6.4.1 / RFC 9112: a 204 response must carry no Content-Length.
+      res.writeHead(204, { "Allow": ALLOWED_METHODS });
       res.end();
       return;
     }

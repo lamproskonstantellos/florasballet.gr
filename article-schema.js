@@ -58,6 +58,30 @@
     if (article.poster !== undefined && typeof article.poster !== "string") {
       throw new Error(`[article] "${article.slug}" has non-string poster`);
     }
+    // cover is the highest-consequence path field — it is interpolated
+    // (unescaped) into og:image / twitter:image / schema.org image and the JSON
+    // Feed image, and joined onto a filesystem path for its dimensions. A
+    // non-string value would break those sinks, so constrain it like the others.
+    if (article.cover !== undefined && typeof article.cover !== "string") {
+      throw new Error(`[article] "${article.slug}" has non-string cover`);
+    }
+    // A sources entry must be an object with an http(s) href and a label: the
+    // href lands in an <a href> with no scheme normalization (unlike cover /
+    // photos, which pass through asset()), and a malformed entry throws inside
+    // the article render, blanking the page.
+    if (Array.isArray(article.sources)) {
+      for (const s of article.sources) {
+        const ok =
+          s && typeof s === "object" &&
+          typeof s.href === "string" && /^https?:\/\//.test(s.href) &&
+          typeof s.label === "string" && s.label !== "";
+        if (!ok) {
+          throw new Error(
+            `[article] "${article.slug}" has an invalid sources entry (expected { href: "http(s)://…", label: "…" })`
+          );
+        }
+      }
+    }
     // A photos entry is either a path string or { src, align? }.
     if (Array.isArray(article.photos)) {
       for (const p of article.photos) {
