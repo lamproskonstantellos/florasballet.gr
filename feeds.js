@@ -56,8 +56,10 @@ function buildSitemap({ articles, siteCfg }) {
   const entries = STATIC_PATHS.map((p) => ({
     path: p,
     lastmod: NEWS_DRIVEN_PATHS.has(p) ? latestContentDate : null,
+    // Only images that actually appear ON the home page (the hero carousel) —
+    // the og-image is metadata-only and never rendered in the body.
     images: p === "/"
-      ? [siteCfg.defaultImage, ...(siteCfg.carousel || [])].map((img) => `${siteCfg.url}${img}`)
+      ? (siteCfg.carousel || []).map((img) => `${siteCfg.url}${img}`)
       : [],
   }));
 
@@ -76,7 +78,7 @@ function buildSitemap({ articles, siteCfg }) {
       .map((e) =>
         `  <url>\n    <loc>${siteCfg.url}${e.path}</loc>` +
         (e.lastmod ? `\n    <lastmod>${e.lastmod}</lastmod>` : "") +
-        e.images.map((img) => `\n    <image:image>\n      <image:loc>${img}</image:loc>\n    </image:image>`).join("") +
+        e.images.map((img) => `\n    <image:image>\n      <image:loc>${escapeHtml(img)}</image:loc>\n    </image:image>`).join("") +
         `\n  </url>`)
       .join("\n") +
     `\n</urlset>\n`
