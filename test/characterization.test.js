@@ -19,6 +19,7 @@ const HTML_ROUTES = [
   ["/didaskontes", "teachers.html"],
   ["/diagonismoi", "competitions.html"],
   ["/nea", "news.html"],
+  ["/epikoinonia", "contact.html"],
   ["/nea/enarxi-eggrafon-2026-2027", "article.html"],
   ["/this-route-does-not-exist", "notfound.html"],
 ];

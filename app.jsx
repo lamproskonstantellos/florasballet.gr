@@ -1,4 +1,4 @@
-/* global React, ReactDOM, SITE, SCHOOL, Icon, Carousel,
+/* global React, ReactDOM, SITE, Icon, Carousel,
    parseRoute, routeToPath, pageTitle, getArticle, handleAnchorClick,
    pickActiveSection,
    HomeIntro, WhyUs, Courses, Contact,
@@ -416,7 +416,6 @@ function App() {
       route.page === "article" ? (getArticle(route.slug) || {}).title : undefined;
     document.title = pageTitle(route, {
       siteName: SITE.name,
-      tagline: SITE.tagline,
       articleTitle,
     });
   }, [route]);

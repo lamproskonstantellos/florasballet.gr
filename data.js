@@ -268,7 +268,6 @@ Object.assign(window, {
   TEACHERS,
   COMPETITIONS,
   LIMITS,
-  sortedNews,
   getRecentNews,
   getArticle,
   defineArticle,

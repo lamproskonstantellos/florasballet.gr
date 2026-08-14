@@ -43,6 +43,7 @@ const HTML_ROUTES = [
   ["/didaskontes", "didaskontes/index.html"],
   ["/diagonismoi", "diagonismoi/index.html"],
   ["/nea", "nea/index.html"],
+  ["/epikoinonia", "epikoinonia/index.html"],
   ...SLUGS.map((s) => [`/nea/${s}`, `nea/${s}/index.html`]),
 ];
 

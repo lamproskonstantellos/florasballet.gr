@@ -14,7 +14,7 @@ const server = require("../server.js");
 const SITE = require("../site.config.js");
 
 const ROOT = path.join(__dirname, "..");
-const ctx = { siteName: SITE.name, tagline: SITE.tagline };
+const ctx = { siteName: SITE.name };
 const ARTICLE = "enarxi-eggrafon-2026-2027";
 
 // ---- pageTitle (shared source of truth) ------------------------------------

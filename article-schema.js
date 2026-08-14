@@ -49,8 +49,10 @@
     if (article.keywords && !Array.isArray(article.keywords)) {
       throw new Error(`[article] "${article.slug}" has non-array keywords`);
     }
-    if (article.topics && !Array.isArray(article.topics)) {
-      throw new Error(`[article] "${article.slug}" has non-array topics`);
+    // coverAlign ("top") shifts the cover crop; it is consumed by the renderer,
+    // so constrain it here too.
+    if (article.coverAlign !== undefined && typeof article.coverAlign !== "string") {
+      throw new Error(`[article] "${article.slug}" has non-string coverAlign`);
     }
     if (article.video !== undefined && typeof article.video !== "string") {
       throw new Error(`[article] "${article.slug}" has non-string video`);
@@ -113,6 +115,6 @@
     module.exports = api;
   }
   if (typeof window !== "undefined") {
-    Object.assign(window, { ArticleSchema: api, validateArticle, compareByDateDesc });
+    Object.assign(window, { validateArticle, compareByDateDesc });
   }
 })();

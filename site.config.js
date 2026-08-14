@@ -13,7 +13,6 @@ const SITE = {
   url: "https://florasballet.gr",
   name: "Σχολή Μπαλέτου Φλώρας Μουστάκη",
   shortName: "Flora's Ballet",
-  tagline: "Σχολή Μπαλέτου στο Μενίδι από το 1986",
   founded: "1986",
   email: "info@florasballet.gr",
 

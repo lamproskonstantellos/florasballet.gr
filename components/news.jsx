@@ -361,4 +361,4 @@ function Article({ slug, navigate }) {
   );
 }
 
-Object.assign(window, { NewsCard, NewsPreview, NewsListPage, Article });
+Object.assign(window, { NewsPreview, NewsListPage, Article });

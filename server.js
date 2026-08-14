@@ -361,7 +361,7 @@ const STATIC_PAGES = {
 
 function computePageMeta(pathname) {
   const route = parseRoute(pathname);
-  const titleCtx = { siteName: SITE_CFG.name, tagline: SITE_CFG.tagline };
+  const titleCtx = { siteName: SITE_CFG.name };
 
   if (route.page === "home") {
     return {
@@ -1010,8 +1010,6 @@ module.exports = {
   discoverArticleSlugs,
   VALID_ARTICLE_SLUGS,
   SECURITY_HEADERS,
-  isPrivatePath,
-  DEPLOY_VERSION,
   ARTICLES,
   ARTICLE_SCRIPTS,
   ASSET_MAP,

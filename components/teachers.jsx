@@ -53,4 +53,4 @@ function TeachersPage() {
   );
 }
 
-Object.assign(window, { TeacherCard, TeachersPage });
+window.TeachersPage = TeachersPage;

@@ -22,8 +22,6 @@ function HomeIntro() {
 
 // Two wide frames stacked one above the other — both keep their natural
 // landscape framing (no tall vertical crop that would lose the scene).
-// (misc-2 is the black-and-white shot, now reused as the news article cover,
-// so it is intentionally dropped here.)
 const WHYUS_PHOTOS = [
   { src: "/images/misc/misc-1.jpg", w: 800, h: 533 },
   { src: "/images/misc/misc-3.jpg", w: 800, h: 533 },

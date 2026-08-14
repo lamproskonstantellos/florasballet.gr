@@ -55,7 +55,8 @@ defineArticle({
 | `body` | ✅ | string[] | Article paragraphs (`**bold**` supported); also JSON-LD `articleBody` |
 | `location` | optional | string | Shown after the date |
 | `cover` | optional | path | Card thumbnail + article cover (`og:image` for the article) |
-| `photos` | optional | (string \| `{ src, align }`)[] | Gallery; `align: "top"` crops from the top |
+| `coverAlign` | optional | `"top"` | Crop the cover from the top instead of the centre |
+| `photos` | optional | (string \| `{ src, alt?, align? }`)[] | Gallery; `alt` sets the image description, `align: "top"` crops from the top |
 | `video` | optional | path | Self-hosted `<video>` embed |
 | `poster` | optional | path | Poster image for `video`; falls back to `cover` |
 | `keywords` | optional | string[] | JSON-LD `keywords` + JSON Feed `tags` |

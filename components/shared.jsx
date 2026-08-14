@@ -1,4 +1,4 @@
-/* global React, Icon, routeToPath */
+/* global React, Icon */
 
 /* ============================================================
    SHARED HELPERS & SMALL UI PRIMITIVES
