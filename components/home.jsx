@@ -28,9 +28,9 @@ const WHYUS_PHOTOS = [
 ];
 
 function WhyUs() {
-  const visible = useReveal();
+  const { ref, visible } = useReveal();
   return (
-    <section className="block" id="giati-emas">
+    <section className="block" id="giati-emas" ref={ref}>
       <SectionHeader center kicker="Η σχολή μας" title="Γιατί εμάς" />
       <div className="whyus-shell">
         <ol className="whyus-points" role="list">
@@ -64,9 +64,9 @@ function WhyUs() {
 }
 
 function Courses() {
-  const visible = useReveal();
+  const { ref, visible } = useReveal();
   return (
-    <section className="block" id="mathimata">
+    <section className="block" id="mathimata" ref={ref}>
       <SectionHeader center kicker="Τμήματα για όλες τις ηλικίες" title="Τα μαθήματα" />
       <div className="courses-grid">
         {COURSES.map((c, i) => (

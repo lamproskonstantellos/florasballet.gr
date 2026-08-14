@@ -128,7 +128,11 @@ function Header({ route, navigate, activeSection }) {
   const ABOUT = { page: "school" };
   const MATH = { page: "home", section: "mathimata" };
   const COMP = { page: "competitions" };
-  const NEWS = { page: "home", section: "nea" };
+  // With zero articles NewsPreview renders nothing, so the home #nea anchor
+  // does not exist — point the nav at /nea (which has its own empty state).
+  const NEWS = (window.NEWS_ARTICLES || []).length
+    ? { page: "home", section: "nea" }
+    : { page: "news-list" };
   const CONTACT = { page: "contact" };
 
   return (
@@ -412,7 +416,24 @@ function App() {
   const firstRender = useRef(true);
 
   useEffect(() => {
-    const onPop = () => setRoute(parseRoute(window.location.pathname));
+    const onPop = () => {
+      const route = parseRoute(window.location.pathname);
+      setRoute(route);
+      // Honour a #section on Back/Forward to a home entry: navigate() pushes
+      // hash-bearing URLs (/#mathimata), but the browser's scroll restoration
+      // knows nothing about the sticky-header offset, and the first-load hash
+      // effect runs only on mount. Re-run the same offset scroll here.
+      const id = window.location.hash.replace(/^#/, "");
+      if (route.page === "home" && id) {
+        requestAnimationFrame(() => {
+          const el = document.getElementById(id);
+          if (el) {
+            const y = el.getBoundingClientRect().top + window.scrollY - headerOffset();
+            window.scrollTo({ top: y, behavior: scrollBehavior() });
+          }
+        });
+      }
+    };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, []);
@@ -504,9 +525,12 @@ function App() {
     // (desktop nav, mobile menu, "back to Νέα" links — anything routed through
     // here) yields a copyable deep link, e.g. "Μαθήματα" → /#mathimata.
     const targetHash = next.page === "home" && next.section ? "#" + next.section : "";
-    const targetUrl = targetPath + targetHash;
+    // Carry the query string across SPA navigations (like the scroll-spy URL
+    // sync does), so ?utm/?fbclid params survive until a full page load.
+    const search = window.location.search;
+    const targetUrl = targetPath + search + targetHash;
     const stateData = opts.from !== undefined ? { from: opts.from } : {};
-    const currentUrl = window.location.pathname + window.location.hash;
+    const currentUrl = window.location.pathname + window.location.search + window.location.hash;
     if (currentUrl !== targetUrl) {
       window.history.pushState(stateData, "", targetUrl);
     } else if (opts.from !== undefined) {

@@ -266,6 +266,8 @@ h1, h2, h3, h4 { font-family: var(--font-serif); }
   flex-direction: column;
   gap: 4px;
   overflow-y: auto;
+  /* Don't let a scroll past the panel's end chain to the locked page behind. */
+  overscroll-behavior: contain;
   animation: slide-in 280ms cubic-bezier(.2, .7, .2, 1);
 }
 @keyframes slide-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
@@ -1140,6 +1142,18 @@ section.block:first-of-type { border-top: none; }
 .article-body p { margin: 0 0 22px; }
 .article-body strong { color: var(--ink); font-weight: 600; }
 
+.article-video { margin: 40px 0; }
+.article-video video {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* Reserve a box before metadata arrives (no CLS); letterbox other ratios. */
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+  background: #000;
+  border-radius: var(--radius-md);
+}
+
 .article-gallery {
   margin: 40px 0;
   display: grid;
@@ -1169,6 +1183,7 @@ section.block:first-of-type { border-top: none; }
   align-items: center;
   justify-content: center;
   padding: 32px;
+  overscroll-behavior: none;
   animation: lightbox-in 180ms ease-out;
 }
 @keyframes lightbox-in { from { opacity: 0; } to { opacity: 1; } }

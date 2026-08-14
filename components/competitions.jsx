@@ -8,7 +8,7 @@
    ============================================================ */
 
 function CompetitionsPage() {
-  const visible = useReveal();
+  const { ref, visible } = useReveal();
   React.useEffect(() => { window.scrollTo({ top: 0 }); }, []);
   const instagram = SITE.socialLinks[1];
   // Derive the visible handle from the URL so the "single source of truth" can
@@ -16,7 +16,7 @@ function CompetitionsPage() {
   const instagramHandle = "@" + instagram.replace(/\/+$/, "").split("/").pop();
 
   return (
-    <div className="page comp-page">
+    <div className="page comp-page" ref={ref}>
       <header className="page-head">
         <span className="section-kicker">Βραβεύσεις & διακρίσεις</span>
         <h1>Διαγωνισμοί</h1>

@@ -6,11 +6,11 @@
    ============================================================ */
 
 function SchoolPage() {
-  const visible = useReveal();
+  const { ref, visible } = useReveal();
   React.useEffect(() => { window.scrollTo({ top: 0 }); }, []);
 
   return (
-    <div className="page school-page">
+    <div className="page school-page" ref={ref}>
       <header className="page-head">
         <span className="section-kicker">Η Σχολή</span>
         <h1>Εμείς</h1>
