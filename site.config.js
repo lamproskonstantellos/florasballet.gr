@@ -13,6 +13,9 @@ const SITE = {
   url: "https://florasballet.gr",
   name: "Σχολή Μπαλέτου Φλώρας Μουστάκη",
   shortName: "Flora's Ballet",
+  // Appended to the home <title> so the most important tag on the most
+  // important page carries the locality keywords the name alone lacks.
+  tagline: "Μπαλέτο & Χορός στο Μενίδι (Αχαρνές)",
   founded: "1986",
   email: "info@florasballet.gr",
 
@@ -49,8 +52,10 @@ const SITE = {
   mapsLink: "https://maps.app.goo.gl/4gSrcz1BEEg4bNbP9",
 
   defaultImage: "/og-image.jpg",
+  // Kept ≤160 characters: it is the home/interior meta description and Google
+  // truncates the snippet around that point.
   defaultDescription:
-    "Αναγνωρισμένη από το κράτος σχολή μπαλέτου στο Μενίδι (Αχαρνές) από το 1986. Κλασικό μπαλέτο, σύγχρονος χορός, μουσικοκινητική αγωγή και μοντέρνο/hip hop, για όλες τις ηλικίες.",
+    "Αναγνωρισμένη από το κράτος σχολή μπαλέτου στο Μενίδι (Αχαρνές) από το 1986. Μπαλέτο, σύγχρονος χορός, μουσικοκινητική και hip hop για όλες τις ηλικίες.",
 
   // Brand logos (40th-anniversary variants are the ones in use this year).
   // The nav/menu use the full-resolution mark (550×270) so it stays crisp on

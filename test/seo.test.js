@@ -162,7 +162,7 @@ test("feed.json conforms to JSON Feed 1.1", async () => {
 test("sitemap.xml is well-formed with absolute locs and YYYY-MM-DD lastmod", async () => {
   const xml = (await request(base, "/sitemap.xml")).body.toString("utf8");
   assert.match(xml, /^<\?xml version="1\.0" encoding="UTF-8"\?>/);
-  assert.match(xml, /<urlset xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9">/);
+  assert.match(xml, /<urlset xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9" xmlns:image="http:\/\/www\.google\.com\/schemas\/sitemap-image\/1\.1">/);
   const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
   assert.ok(locs.length >= 6, "home + 4 interior pages + at least one article");
   for (const loc of locs) assert.match(loc, /^https:\/\/florasballet\.gr\//);

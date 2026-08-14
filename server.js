@@ -362,7 +362,7 @@ const STATIC_PAGES = {
 
 function computePageMeta(pathname) {
   const route = parseRoute(pathname);
-  const titleCtx = { siteName: SITE_CFG.name };
+  const titleCtx = { siteName: SITE_CFG.name, tagline: SITE_CFG.tagline };
 
   if (route.page === "home") {
     return {
@@ -477,7 +477,7 @@ function computePageMeta(pathname) {
 
       return {
         title: pageTitle(route, { ...titleCtx, articleTitle: article.title }),
-        description: article.excerpt,
+        description: article.metaDescription || article.excerpt,
         url: `${SITE_CFG.url}/nea/${article.slug}`,
         image,
         imageWidth: imageDimensions && imageDimensions.width,

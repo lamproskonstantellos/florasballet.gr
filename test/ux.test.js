@@ -14,7 +14,7 @@ const server = require("../server.js");
 const SITE = require("../site.config.js");
 
 const ROOT = path.join(__dirname, "..");
-const ctx = { siteName: SITE.name };
+const ctx = { siteName: SITE.name, tagline: SITE.tagline };
 const ARTICLE = "enarxi-eggrafon-2026-2027";
 
 // ---- pageTitle (shared source of truth) ------------------------------------
@@ -22,7 +22,7 @@ const ARTICLE = "enarxi-eggrafon-2026-2027";
 function pageTitleFor(route) { return routes.pageTitle(route, ctx); }
 
 test("pageTitle covers every route", () => {
-  assert.equal(pageTitleFor({ page: "home" }), SITE.name);
+  assert.equal(pageTitleFor({ page: "home" }), `${SITE.name} – ${SITE.tagline}`);
   assert.equal(pageTitleFor({ page: "school" }), `Η Σχολή – ${SITE.name}`);
   assert.equal(pageTitleFor({ page: "teachers" }), `Διδάσκοντες – ${SITE.name}`);
   assert.equal(pageTitleFor({ page: "competitions" }), `Διαγωνισμοί – ${SITE.name}`);

@@ -41,7 +41,8 @@ const NEWS_DRIVEN_PATHS = new Set(["/", "/nea"]);
 
 // sitemap.xml — the static pages, then one <url> per article in folder order.
 // News-driven index pages carry the most-recent article date as their lastmod;
-// the rest omit it.
+// the rest omit it. Image extension entries point Google Images at the hero
+// photography (home) and each article's cover.
 function buildSitemap({ articles, siteCfg }) {
   const list = Array.isArray(articles) ? articles : [];
 
@@ -55,22 +56,27 @@ function buildSitemap({ articles, siteCfg }) {
   const entries = STATIC_PATHS.map((p) => ({
     path: p,
     lastmod: NEWS_DRIVEN_PATHS.has(p) ? latestContentDate : null,
+    images: p === "/"
+      ? [siteCfg.defaultImage, ...(siteCfg.carousel || [])].map((img) => `${siteCfg.url}${img}`)
+      : [],
   }));
 
   for (const a of list) {
     entries.push({
       path: `/nea/${a.slug}`,
       lastmod: a && ISO_DATE.test(a.date) ? a.date : latestContentDate,
+      images: a.cover ? [`${siteCfg.url}/${a.cover}`] : [],
     });
   }
 
   return (
     `<?xml version="1.0" encoding="UTF-8"?>\n` +
-    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n` +
     entries
       .map((e) =>
         `  <url>\n    <loc>${siteCfg.url}${e.path}</loc>` +
         (e.lastmod ? `\n    <lastmod>${e.lastmod}</lastmod>` : "") +
+        e.images.map((img) => `\n    <image:image>\n      <image:loc>${img}</image:loc>\n    </image:image>`).join("") +
         `\n  </url>`)
       .join("\n") +
     `\n</urlset>\n`

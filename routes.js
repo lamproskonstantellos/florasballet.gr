@@ -66,11 +66,13 @@
   // The document <title> for a route. Single source of truth shared by the
   // server (computePageMeta, injected into the served HTML) and the client
   // (navigate, which keeps the tab title correct after SPA navigation).
-  // ctx: { siteName, articleTitle }.
+  // ctx: { siteName, tagline, articleTitle }.
   function pageTitle(route, ctx) {
     switch (route && route.page) {
       case "home":
-        return ctx.siteName;
+        // The home title carries the tagline: the name alone has no locality
+        // keyword, and this is the highest-weight tag on the highest-weight page.
+        return ctx.tagline ? `${ctx.siteName} – ${ctx.tagline}` : ctx.siteName;
       case "school":
         return `Η Σχολή – ${ctx.siteName}`;
       case "teachers":

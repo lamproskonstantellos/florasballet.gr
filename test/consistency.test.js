@@ -35,7 +35,7 @@ test("parseRoute, computePageMeta and isValidSpaRoute agree on a corpus", () => 
 
     if (r.page === "home") {
       assert.equal(meta.ogType, "website");
-      assert.equal(meta.title, SITE.name, `${p}: home title`);
+      assert.equal(meta.title, `${SITE.name} – ${SITE.tagline}`, `${p}: home title`);
       assert.equal(valid, true, `${p}: home valid`);
     } else if (["school", "teachers", "competitions", "news-list", "contact"].includes(r.page)) {
       assert.equal(meta.ogType, "website", p);

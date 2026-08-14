@@ -1,8 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://florasballet.gr/</loc>
     <lastmod>2026-09-01</lastmod>
+    <image:image>
+      <image:loc>https://florasballet.gr/og-image.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://florasballet.gr/images/carousel/carousel-1.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://florasballet.gr/images/carousel/carousel-2.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://florasballet.gr/images/carousel/carousel-3.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://florasballet.gr/images/carousel/carousel-4.jpg</image:loc>
+    </image:image>
   </url>
   <url>
     <loc>https://florasballet.gr/i-scholi</loc>
@@ -23,21 +38,36 @@
   <url>
     <loc>https://florasballet.gr/nea/40-chronia-scholis</loc>
     <lastmod>2026-06-20</lastmod>
+    <image:image>
+      <image:loc>https://florasballet.gr/news/40-chronia-scholis/cover.jpg</image:loc>
+    </image:image>
   </url>
   <url>
     <loc>https://florasballet.gr/nea/enarxi-eggrafon-2026-2027</loc>
     <lastmod>2026-09-01</lastmod>
+    <image:image>
+      <image:loc>https://florasballet.gr/news/enarxi-eggrafon-2026-2027/cover.jpg</image:loc>
+    </image:image>
   </url>
   <url>
     <loc>https://florasballet.gr/nea/festival-entechnou-chorou</loc>
     <lastmod>2024-05-11</lastmod>
+    <image:image>
+      <image:loc>https://florasballet.gr/news/festival-entechnou-chorou/cover.jpg</image:loc>
+    </image:image>
   </url>
   <url>
     <loc>https://florasballet.gr/nea/pagkosmia-imera-chorou</loc>
     <lastmod>2026-04-29</lastmod>
+    <image:image>
+      <image:loc>https://florasballet.gr/news/pagkosmia-imera-chorou/cover.jpg</image:loc>
+    </image:image>
   </url>
   <url>
     <loc>https://florasballet.gr/nea/parastasi-alice-in-wonderland</loc>
     <lastmod>2025-06-29</lastmod>
+    <image:image>
+      <image:loc>https://florasballet.gr/news/parastasi-alice-in-wonderland/cover.jpg</image:loc>
+    </image:image>
   </url>
 </urlset>
