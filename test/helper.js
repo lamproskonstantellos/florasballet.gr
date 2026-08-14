@@ -20,14 +20,22 @@ function normalizeHtml(s) {
     .replace(/\?v=[^"'&\s]*/g, "?v=V");
 }
 
-// Compare `actual` against test/golden/<name>. First run (or UPDATE_GOLDEN=1)
-// writes the golden; later runs assert byte-equality.
+// Compare `actual` against test/golden/<name>. UPDATE_GOLDEN=1 rewrites the
+// golden (refused in CI, where a rewrite would silently pass a drifted suite);
+// a missing golden is a hard failure so a new assertion is never a no-op on
+// its first run.
 function matchGolden(name, actual) {
   const file = path.join(GOLDEN_DIR, name);
   fs.mkdirSync(GOLDEN_DIR, { recursive: true });
-  if (process.env.UPDATE_GOLDEN || !fs.existsSync(file)) {
+  if (process.env.UPDATE_GOLDEN) {
+    if (process.env.CI) {
+      throw new Error("UPDATE_GOLDEN must not be set in CI — goldens are refreshed locally and committed");
+    }
     fs.writeFileSync(file, actual);
     return;
+  }
+  if (!fs.existsSync(file)) {
+    throw new Error(`missing golden: ${name} — run UPDATE_GOLDEN=1 npm test locally to create it`);
   }
   const expected = fs.readFileSync(file, "utf8");
   assert.strictEqual(

@@ -56,17 +56,30 @@ function Carousel() {
     return () => clearInterval(id);
   }, [autoplaying, count, index]);
 
-  // Mount a slide's image once it becomes current or the immediate next one, so
-  // slides 3–4 are deferred past first paint (only slide 1 is eager/preloaded).
+  // Mount a slide's image once it becomes current or an immediate neighbour
+  // (next AND previous — the prev arrow and dot jumps move backwards too), so
+  // the later slides are deferred past first paint without a manual move ever
+  // crossfading into a not-yet-mounted slide.
   useEffect(() => {
     setLoaded((prev) => {
-      if (prev.has(index) && prev.has((index + 1) % count)) return prev;
+      const wanted = [index, (index + 1) % count, (index - 1 + count) % count];
+      if (wanted.every((i) => prev.has(i))) return prev;
       const n = new Set(prev);
-      n.add(index);
-      n.add((index + 1) % count);
+      for (const i of wanted) n.add(i);
       return n;
     });
   }, [index, count]);
+
+  // Shortly after first paint, mount every slide: the LCP win is only about the
+  // very first render, and having all slides decoded before the first autoplay
+  // step (5s) or any dot jump means no crossfade can ever race a network fetch.
+  useEffect(() => {
+    if (count <= 1) return;
+    const t = setTimeout(() => {
+      setLoaded(new Set(Array.from({ length: count }, (_, i) => i)));
+    }, 2500);
+    return () => clearTimeout(t);
+  }, [count]);
 
   const onKeyDown = (e) => {
     if (e.key === "ArrowLeft") { e.preventDefault(); prev(); }
@@ -83,15 +96,22 @@ function Carousel() {
 
   if (!count) return null;
 
+  // The play/pause button is exempt from the hover/focus courtesy pause: it IS
+  // the explicit control, and pressing it swaps its icon under the pointer,
+  // which makes the browser re-dispatch mouseenter up the ancestor chain — a
+  // non-exempt handler would instantly re-set `hovered` and undo a resume.
+  const overPlayPause = (e) =>
+    e.target && e.target.closest && e.target.closest(".carousel-playpause");
+
   return (
     <section
       className="carousel"
       role="group"
       aria-roledescription="carousel"
       aria-label="Φωτογραφίες της σχολής"
-      onMouseEnter={() => setHovered(true)}
+      onMouseEnter={(e) => { if (!overPlayPause(e)) setHovered(true); }}
       onMouseLeave={() => setHovered(false)}
-      onFocus={() => setHovered(true)}
+      onFocus={(e) => { if (!overPlayPause(e)) setHovered(true); }}
       onBlur={() => setHovered(false)}
       onKeyDown={onKeyDown}
       onTouchStart={onTouchStart}
@@ -146,7 +166,13 @@ function Carousel() {
               className="carousel-playpause"
               aria-label={userPaused ? "Αναπαραγωγή προβολής" : "Παύση προβολής"}
               aria-pressed={userPaused ? "true" : "false"}
-              onClick={() => setUserPaused((p) => !p)}
+              onClick={() => {
+                // Resuming must actually resume: the pointer/focus that pressed
+                // Play may have set `hovered` on the way in — an explicit Play
+                // wins over the hover/focus courtesy pause.
+                if (userPaused) setHovered(false);
+                setUserPaused(!userPaused);
+              }}
             >
               {userPaused
                 ? <Icon.play style={{ width: 16, height: 16 }} />

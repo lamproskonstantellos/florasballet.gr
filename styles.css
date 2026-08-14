@@ -266,6 +266,8 @@ h1, h2, h3, h4 { font-family: var(--font-serif); }
   flex-direction: column;
   gap: 4px;
   overflow-y: auto;
+  /* Don't let a scroll past the panel's end chain to the locked page behind. */
+  overscroll-behavior: contain;
   animation: slide-in 280ms cubic-bezier(.2, .7, .2, 1);
 }
 @keyframes slide-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
@@ -1042,6 +1044,9 @@ section.block:first-of-type { border-top: none; }
 }
 .comp-year:last-of-type { border-bottom: 1px solid var(--line); }
 .comp-year-label {
+  /* Now an <h2> (real heading semantics): zero the UA heading margins the
+     stylesheet never resets, or the grid row gains ~43px of dead space. */
+  margin: 0;
   font-family: var(--font-serif);
   font-size: clamp(36px, 5vw, 52px);
   font-weight: 600;
@@ -1137,6 +1142,18 @@ section.block:first-of-type { border-top: none; }
 .article-body p { margin: 0 0 22px; }
 .article-body strong { color: var(--ink); font-weight: 600; }
 
+.article-video { margin: 40px 0; }
+.article-video video {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* Reserve a box before metadata arrives (no CLS); letterbox other ratios. */
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+  background: #000;
+  border-radius: var(--radius-md);
+}
+
 .article-gallery {
   margin: 40px 0;
   display: grid;
@@ -1166,10 +1183,17 @@ section.block:first-of-type { border-top: none; }
   align-items: center;
   justify-content: center;
   padding: 32px;
+  overscroll-behavior: none;
   animation: lightbox-in 180ms ease-out;
 }
 @keyframes lightbox-in { from { opacity: 0; } to { opacity: 1; } }
-.lightbox-figure { display: contents; }
+/* Both the wrapper div AND the <picture> the Picture component renders must be
+   display:contents, so the <img> itself is the flex item of .lightbox — only
+   then does its max-height:100% resolve against the lightbox's definite height
+   instead of computing to none and letting tall photos overflow the viewport.
+   (display:contents on <picture> does not affect source selection.) */
+.lightbox-figure,
+.lightbox-figure picture { display: contents; }
 .lightbox-img {
   max-width: min(100%, 1100px);
   max-height: 100%;

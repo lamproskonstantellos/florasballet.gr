@@ -42,7 +42,7 @@ function NewsCard({ article, index = 0, navigate, revealKey, isVisible, from, he
 }
 
 function NewsPreview({ navigate }) {
-  const visible = useReveal();
+  const { ref, visible } = useReveal();
   const limit = LIMITS.newsPreview;
   const items = getRecentNews(limit);
   const showViewAll = getRecentNews().length > limit;
@@ -50,7 +50,7 @@ function NewsPreview({ navigate }) {
   if (items.length === 0) return null;
 
   return (
-    <section className="block" id="nea">
+    <section className="block" id="nea" ref={ref}>
       <SectionHeader center kicker="Τι νέο υπάρχει" title="Νέα & Ανακοινώσεις" />
       <div className="news-grid">
         {items.map((n, i) => (
@@ -78,7 +78,7 @@ function NewsPreview({ navigate }) {
 }
 
 function NewsListPage({ navigate }) {
-  const visible = useReveal();
+  const { ref, visible } = useReveal();
   const items = getRecentNews();
 
   React.useEffect(() => { window.scrollTo({ top: 0 }); }, []);
@@ -86,7 +86,7 @@ function NewsListPage({ navigate }) {
   const backRoute = { page: "home", section: "nea" };
 
   return (
-    <div className="page list-page">
+    <div className="page list-page" ref={ref}>
       <a
         className="back-link"
         href={routeToPath(backRoute)}
@@ -303,10 +303,18 @@ function Article({ slug, navigate }) {
         <div className="article-video">
           <video
             controls
+            playsInline
             preload="metadata"
             poster={article.poster ? asset(article.poster) : (article.cover ? asset(article.cover) : undefined)}
           >
-            <source src={asset(article.video)} type="video/mp4" />
+            <source
+              src={asset(article.video)}
+              type={
+                { mp4: "video/mp4", m4v: "video/mp4", webm: "video/webm", ogv: "video/ogg" }[
+                  article.video.split(".").pop().toLowerCase()
+                ] || "video/mp4"
+              }
+            />
           </video>
         </div>
       )}

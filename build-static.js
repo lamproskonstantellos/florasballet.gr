@@ -132,20 +132,43 @@ function copyDir(outDir, relDir, skip) {
   });
 }
 
-// The _headers file: reproduce SECURITY_HEADERS verbatim plus all four cache
-// classes. Cloudflare matches the REQUEST path, so the extensionless SPA routes
-// are listed explicitly. Rules go general → specific so the intended value wins
-// under both of Cloudflare's precedence models.
-function buildHeadersFile(securityHeaders, htmlPathnames) {
+// The _headers file: reproduce SECURITY_HEADERS verbatim plus the cache
+// classes. Cloudflare matches the REQUEST path, and an UNKNOWN path (which is
+// what serves 404.html) matches only the catch-all — so the catch-all must be
+// no-store, or every 404 would be pinned in browser/CDN caches for a day (the
+// worst class to cache: a URL that becomes valid on the next deploy). The
+// asset classes then re-add their long TTLs on top. Rules go general →
+// specific so the intended value wins under both of Cloudflare's precedence
+// models. (The ?v= immutable class the preview server offers cannot be
+// expressed here: _headers cannot match query strings, so ?v=-stamped root
+// files get the plain asset TTL in production.)
+function buildHeadersFile(securityHeaders) {
   const NO_STORE = "Cache-Control: no-cache, no-store, must-revalidate";
+  const DAY = "Cache-Control: public, max-age=86400";
   const lines = [];
 
+  // Catch-all: security headers everywhere; HTML (known routes and the 404
+  // fallback alike) stays uncached.
   lines.push("/*");
   for (const [name, value] of Object.entries(securityHeaders)) {
     lines.push(`  ${name}: ${value}`);
   }
-  lines.push("  Cache-Control: public, max-age=86400");
+  lines.push(`  ${NO_STORE}`);
   lines.push("");
+
+  // Asset directories: one day, like the preview server's default class.
+  for (const dir of ["/vendor/*", "/favicon/*", "/brand/*", "/images/*", "/news/*"]) {
+    lines.push(dir);
+    lines.push(`  ${DAY}`);
+    lines.push("");
+  }
+
+  // Public root files (the copied allowlist + the social image variants).
+  for (const rel of [...ROOT_PLAIN_FILES, "og-image.jpg", "og-image.webp", "og-image.avif"]) {
+    lines.push(`/${rel}`);
+    lines.push(`  ${DAY}`);
+    lines.push("");
+  }
 
   for (const feed of ["/sitemap.xml", "/rss.xml", "/feed.json"]) {
     lines.push(feed);
@@ -156,15 +179,6 @@ function buildHeadersFile(securityHeaders, htmlPathnames) {
   lines.push("/dist/*");
   lines.push("  Cache-Control: public, max-age=31536000, immutable");
   lines.push("");
-
-  lines.push("/*.html");
-  lines.push(`  ${NO_STORE}`);
-  lines.push("");
-  for (const pathname of htmlPathnames) {
-    lines.push(pathname);
-    lines.push(`  ${NO_STORE}`);
-    lines.push("");
-  }
 
   return lines.join("\n");
 }
@@ -212,7 +226,7 @@ function buildStatic({ outDir = DEFAULT_OUT } = {}) {
   writeFile(outDir, "feed.json", buildFeed({ articles: ARTICLES, siteCfg: SITE_CFG }));
 
   // --- 3. Cloudflare config ------------------------------------------------
-  writeFile(outDir, "_headers", buildHeadersFile(SECURITY_HEADERS, htmlRoutes.map((r) => r.pathname)));
+  writeFile(outDir, "_headers", buildHeadersFile(SECURITY_HEADERS));
   writeFile(outDir, "_redirects", "/index.html  /  301\n");
 
   // --- 4. Public assets ----------------------------------------------------

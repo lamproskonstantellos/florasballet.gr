@@ -38,10 +38,17 @@ function renderInline(text) {
   });
 }
 
+// Returns { ref, visible }: attach `ref` to the section that owns the reveal
+// targets. Scoping the query to the container keeps multiple useReveal callers
+// on one page from cross-observing each other's nodes (extra observers, tripled
+// state updates, and a latent key-collision hazard); with no ref attached it
+// falls back to the whole document.
 function useReveal() {
+  const ref = React.useRef(null);
   const [visible, setVisible] = React.useState(new Set());
   React.useEffect(() => {
-    const items = document.querySelectorAll("[data-reveal]");
+    const root = ref.current || document;
+    const items = root.querySelectorAll("[data-reveal]");
     if (!items.length) return;
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e) => {
@@ -55,7 +62,7 @@ function useReveal() {
     items.forEach((it) => io.observe(it));
     return () => io.disconnect();
   }, []);
-  return visible;
+  return { ref, visible };
 }
 
 function SectionHeader({ kicker, title, action, center, as }) {
