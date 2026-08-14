@@ -29,7 +29,8 @@ const {
   SECURITY_HEADERS,
   SITE_CFG,
 } = require("./server.js");
-const { buildSitemap, buildRss, buildFeed } = require("./feeds.js");
+const { buildSitemap, buildRss, buildFeed, buildLlmsTxt } = require("./feeds.js");
+const { loadContentData } = require("./static-html.js");
 
 const ROOT = __dirname;
 const DEFAULT_OUT = path.join(ROOT, "build");
@@ -76,6 +77,7 @@ const MUST_BE_ABSENT = [
   "server.js",
   "build-static.js",
   "feeds.js",
+  "static-html.js",
   "package.json",
   "package-lock.json",
   ".gitignore",
@@ -170,7 +172,7 @@ function buildHeadersFile(securityHeaders) {
     lines.push("");
   }
 
-  for (const feed of ["/sitemap.xml", "/rss.xml", "/feed.json"]) {
+  for (const feed of ["/sitemap.xml", "/rss.xml", "/feed.json", "/llms.txt"]) {
     lines.push(feed);
     lines.push("  Cache-Control: public, max-age=3600");
     lines.push("");
@@ -224,6 +226,7 @@ function buildStatic({ outDir = DEFAULT_OUT } = {}) {
   writeFile(outDir, "sitemap.xml", buildSitemap({ articles: ARTICLES, siteCfg: SITE_CFG }));
   writeFile(outDir, "rss.xml", buildRss({ articles: ARTICLES, siteCfg: SITE_CFG }));
   writeFile(outDir, "feed.json", buildFeed({ articles: ARTICLES, siteCfg: SITE_CFG }));
+  writeFile(outDir, "llms.txt", buildLlmsTxt({ articles: ARTICLES, siteCfg: SITE_CFG, data: loadContentData(ROOT) }));
 
   // --- 3. Cloudflare config ------------------------------------------------
   writeFile(outDir, "_headers", buildHeadersFile(SECURITY_HEADERS));

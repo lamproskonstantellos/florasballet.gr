@@ -54,6 +54,12 @@
     if (article.coverAlign !== undefined && typeof article.coverAlign !== "string") {
       throw new Error(`[article] "${article.slug}" has non-string coverAlign`);
     }
+    // metaDescription optionally overrides the excerpt for <meta description>
+    // (search snippets truncate around 160 chars; the excerpt doubles as the
+    // visible card teaser, which may legitimately run longer).
+    if (article.metaDescription !== undefined && typeof article.metaDescription !== "string") {
+      throw new Error(`[article] "${article.slug}" has non-string metaDescription`);
+    }
     if (article.video !== undefined && typeof article.video !== "string") {
       throw new Error(`[article] "${article.slug}" has non-string video`);
     }

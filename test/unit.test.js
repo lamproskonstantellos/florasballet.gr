@@ -71,7 +71,7 @@ test("isValidSpaRoute corpus", () => {
 test("computePageMeta home", () => {
   const m = computePageMeta("/");
   assert.equal(m.ogType, "website");
-  assert.equal(m.title, SITE.name, "home title is just the school name");
+  assert.equal(m.title, `${SITE.name} – ${SITE.tagline}`, "home title carries the locality tagline");
   assert.ok(m.jsonLd, "home has JSON-LD");
   assert.equal(m.url, "https://florasballet.gr/");
   // The home graph is a DanceSchool / LocalBusiness.

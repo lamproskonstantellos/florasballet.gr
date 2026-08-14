@@ -58,7 +58,7 @@ test("status codes per route", async () => {
 test("title per route", async () => {
   const titleOf = (b) => (b.toString("utf8").match(/<title>([^<]*)<\/title>/) || [])[1];
   assert.equal(titleOf((await request(base, "/")).body),
-    "Σχολή Μπαλέτου Φλώρας Μουστάκη");
+    "Σχολή Μπαλέτου Φλώρας Μουστάκη – Μπαλέτο &amp; Χορός στο Μενίδι (Αχαρνές)");
   assert.equal(titleOf((await request(base, "/i-scholi")).body), "Η Σχολή – Σχολή Μπαλέτου Φλώρας Μουστάκη");
   assert.equal(titleOf((await request(base, "/didaskontes")).body), "Διδάσκοντες – Σχολή Μπαλέτου Φλώρας Μουστάκη");
   assert.equal(titleOf((await request(base, "/diagonismoi")).body), "Διαγωνισμοί – Σχολή Μπαλέτου Φλώρας Μουστάκη");

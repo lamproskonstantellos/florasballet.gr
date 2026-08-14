@@ -7,7 +7,8 @@ const { URL } = require("url");
 const SITE_CFG = require("./site.config.js");
 const { parseRoute, isValidSpaRoute: routeIsValidSpa, pageTitle } = require("./routes.js");
 const { validateArticle, compareByDateDesc } = require("./article-schema.js");
-const { buildSitemap, buildRss, buildFeed } = require("./feeds.js");
+const { buildSitemap, buildRss, buildFeed, buildLlmsTxt } = require("./feeds.js");
+const { renderStaticBody, loadContentData } = require("./static-html.js");
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = __dirname;
@@ -310,6 +311,10 @@ const ARTICLE_SCRIPTS = VALID_ARTICLE_SLUGS
   .map((slug) => `<script src="/news/${slug}/article.js"></script>`)
   .join("\n");
 const ASSET_MAP = loadAssetMap();
+// Content globals from data.js (evaluated with a fake window, like article.js)
+// for the static pre-rendered body, plus the articles newest-first.
+const CONTENT_DATA = loadContentData(PUBLIC_DIR);
+const ARTICLES_BY_DATE = [...ARTICLES].sort(compareByDateDesc);
 
 function escapeHtml(s) {
   return String(s)
@@ -320,20 +325,6 @@ function escapeHtml(s) {
     .replace(/'/g, "&#39;");
 }
 
-// The no-JavaScript fallback shown inside <noscript>: the SPA renders nothing
-// without JS, so a visitor whose JS failed/blocked would otherwise see a blank
-// page. Built from site.config so it never drifts and index.html hardcodes no
-// identity. Route-independent (identity only).
-const NOSCRIPT_HTML =
-  `<div class="noscript-fallback">` +
-  `<h1>${escapeHtml(SITE_CFG.name)}</h1>` +
-  `<p>${escapeHtml(SITE_CFG.defaultDescription)}</p>` +
-  `<p><strong>Τηλέφωνα:</strong> ${SITE_CFG.phones.map((p) => escapeHtml(p.display)).join(" · ")}</p>` +
-  `<p><strong>Email:</strong> ${escapeHtml(SITE_CFG.email)}</p>` +
-  `<p><strong>Διεύθυνση:</strong> ${escapeHtml(SITE_CFG.address.street)}, ${escapeHtml(SITE_CFG.address.postalCode)} ${escapeHtml(SITE_CFG.address.area)}</p>` +
-  `<p><strong>Ώρες:</strong> ${SITE_CFG.hours.map((h) => escapeHtml(`${h.label} ${h.time}`)).join(" · ")}</p>` +
-  `<p>Για την πλήρη περιήγηση στον ιστότοπο απαιτείται JavaScript.</p>` +
-  `</div>`;
 
 // Static interior pages: label + description + breadcrumb, keyed by route.page.
 const STATIC_PAGES = {
@@ -371,7 +362,7 @@ const STATIC_PAGES = {
 
 function computePageMeta(pathname) {
   const route = parseRoute(pathname);
-  const titleCtx = { siteName: SITE_CFG.name };
+  const titleCtx = { siteName: SITE_CFG.name, tagline: SITE_CFG.tagline };
 
   if (route.page === "home") {
     return {
@@ -486,7 +477,7 @@ function computePageMeta(pathname) {
 
       return {
         title: pageTitle(route, { ...titleCtx, articleTitle: article.title }),
-        description: article.excerpt,
+        description: article.metaDescription || article.excerpt,
         url: `${SITE_CFG.url}/nea/${article.slug}`,
         image,
         imageWidth: imageDimensions && imageDimensions.width,
@@ -663,7 +654,7 @@ function injectMeta(html, meta) {
     IMAGE_ALT: () => escapeHtml(meta.imageAlt || meta.title),
     OG_TYPE: () => escapeHtml(meta.ogType),
     ARTICLE_TAGS: () => (meta.articleTags ? meta.articleTags : ""),
-    NOSCRIPT: () => NOSCRIPT_HTML,
+    STATIC: () => (meta.staticHtml ? meta.staticHtml : ""),
     // Emit the whole <script> element only when there is a graph, so routes
     // with no structured data (the 404 page) ship no empty ld+json block for a
     // validator to choke on.
@@ -685,6 +676,14 @@ function injectMeta(html, meta) {
 function renderHtml(templateHtml, pathname, { deployVersion, articleScripts, assetMap } = {}) {
   const map = assetMap || {};
   const meta = computePageMeta(pathname);
+  // Pre-rendered body for #root: full page content and internal links for
+  // crawlers that do not execute JavaScript (and for no-JS visitors). The
+  // React app replaces it when it boots.
+  meta.staticHtml = renderStaticBody(parseRoute(pathname), {
+    data: CONTENT_DATA,
+    siteCfg: SITE_CFG,
+    articles: ARTICLES_BY_DATE,
+  });
   const processedHtml = injectMeta(templateHtml, meta);
   const withArticles = articleScripts
     ? processedHtml.replace(
@@ -841,6 +840,7 @@ const PRIVATE_PATHS = new Set([
   "/server.js",
   "/build-static.js",
   "/feeds.js",
+  "/static-html.js",
   "/package.json",
   "/package-lock.json",
   "/.gitignore",
@@ -980,6 +980,15 @@ const server = http.createServer((req, res) => {
         "Content-Type": "application/rss+xml; charset=utf-8",
         "Cache-Control": "public, max-age=3600",
       }, xml, "feed:rss");
+      return;
+    }
+
+    if (urlPathname === "/llms.txt") {
+      const txt = buildLlmsTxt({ articles: ARTICLES, siteCfg: SITE_CFG, data: CONTENT_DATA });
+      writeCompressed(req, res, {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "public, max-age=3600",
+      }, txt, "feed:llms");
       return;
     }
 

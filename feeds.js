@@ -41,7 +41,8 @@ const NEWS_DRIVEN_PATHS = new Set(["/", "/nea"]);
 
 // sitemap.xml — the static pages, then one <url> per article in folder order.
 // News-driven index pages carry the most-recent article date as their lastmod;
-// the rest omit it.
+// the rest omit it. Image extension entries point Google Images at the hero
+// photography (home) and each article's cover.
 function buildSitemap({ articles, siteCfg }) {
   const list = Array.isArray(articles) ? articles : [];
 
@@ -55,22 +56,27 @@ function buildSitemap({ articles, siteCfg }) {
   const entries = STATIC_PATHS.map((p) => ({
     path: p,
     lastmod: NEWS_DRIVEN_PATHS.has(p) ? latestContentDate : null,
+    images: p === "/"
+      ? [siteCfg.defaultImage, ...(siteCfg.carousel || [])].map((img) => `${siteCfg.url}${img}`)
+      : [],
   }));
 
   for (const a of list) {
     entries.push({
       path: `/nea/${a.slug}`,
       lastmod: a && ISO_DATE.test(a.date) ? a.date : latestContentDate,
+      images: a.cover ? [`${siteCfg.url}/${a.cover}`] : [],
     });
   }
 
   return (
     `<?xml version="1.0" encoding="UTF-8"?>\n` +
-    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n` +
     entries
       .map((e) =>
         `  <url>\n    <loc>${siteCfg.url}${e.path}</loc>` +
         (e.lastmod ? `\n    <lastmod>${e.lastmod}</lastmod>` : "") +
+        e.images.map((img) => `\n    <image:image>\n      <image:loc>${img}</image:loc>\n    </image:image>`).join("") +
         `\n  </url>`)
       .join("\n") +
     `\n</urlset>\n`
@@ -162,4 +168,57 @@ function buildFeed({ articles, siteCfg }) {
   return JSON.stringify(feed, null, 2);
 }
 
-module.exports = { buildSitemap, buildRss, buildFeed };
+// llms.txt — the llmstxt.org convention: a Markdown site summary served at
+// /llms.txt so AI assistants and answer engines get the essentials (identity,
+// contact details, page map, courses, latest news) in one plain-text fetch,
+// without parsing HTML. Built from the same site config / content data as
+// everything else so it can never drift.
+function buildLlmsTxt({ articles, siteCfg, data }) {
+  const items = (Array.isArray(articles) ? articles : [])
+    .filter((a) => a && a.date)
+    .sort(compareByDateDesc);
+
+  const lines = [
+    `# ${siteCfg.name} (${siteCfg.shortName})`,
+    ``,
+    `> ${siteCfg.defaultDescription}`,
+    ``,
+    `- Διεύθυνση: ${siteCfg.address.street}, ${siteCfg.address.postalCode} ${siteCfg.address.area}, ${siteCfg.address.region}, Ελλάδα`,
+    `- Τηλέφωνα: ${siteCfg.phones.map((p) => p.display).join(", ")}`,
+    `- Email: ${siteCfg.email}`,
+    `- Ώρες λειτουργίας: ${siteCfg.hours.map((h) => `${h.label} ${h.time}`).join(" · ")}`,
+    `- Έτος ίδρυσης: ${siteCfg.founded}`,
+    `- Ιστότοπος: ${siteCfg.url}/`,
+    `- Χάρτης: ${siteCfg.mapsLink}`,
+    ``,
+    `## Σελίδες`,
+    ``,
+    `- [Αρχική](${siteCfg.url}/): Παρουσίαση της σχολής, μαθήματα και νέα`,
+    `- [Η Σχολή](${siteCfg.url}/i-scholi): Ταυτότητα, ιστορία, φιλοσοφία, όραμα και στόχοι`,
+    `- [Διδάσκοντες](${siteCfg.url}/didaskontes): Οι δάσκαλοι της σχολής`,
+    `- [Διαγωνισμοί](${siteCfg.url}/diagonismoi): Βραβεύσεις και διακρίσεις ανά χρονιά`,
+    `- [Νέα & Ανακοινώσεις](${siteCfg.url}/nea): Όλες οι ανακοινώσεις`,
+    `- [Επικοινωνία](${siteCfg.url}/epikoinonia): Τηλέφωνα, διεύθυνση, ώρες και χάρτης`,
+    ``,
+  ];
+
+  if (data && Array.isArray(data.COURSES) && data.COURSES.length) {
+    lines.push(`## Μαθήματα`, ``);
+    for (const c of data.COURSES) {
+      lines.push(`- ${c.title}: ${c.desc}`);
+    }
+    lines.push(``);
+  }
+
+  if (items.length) {
+    lines.push(`## Νέα`, ``);
+    for (const a of items) {
+      lines.push(`- [${a.title}](${siteCfg.url}/nea/${a.slug}) (${a.date}): ${a.excerpt}`);
+    }
+    lines.push(``);
+  }
+
+  return lines.join("\n");
+}
+
+module.exports = { buildSitemap, buildRss, buildFeed, buildLlmsTxt };

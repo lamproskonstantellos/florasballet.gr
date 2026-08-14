@@ -1526,24 +1526,6 @@ section.block:first-of-type { border-top: none; }
   .carousel-slide img { transform: none !important; }
 }
 
-/* ===== No-JS fallback ===== */
-.noscript-fallback {
-  max-width: 640px;
-  margin: 48px auto;
-  padding: 0 24px;
-  font-family: var(--font-sans);
-  color: var(--ink);
-  text-align: center;
-  line-height: 1.7;
-}
-.noscript-fallback h1 {
-  font-family: var(--font-serif);
-  font-size: clamp(26px, 5vw, 38px);
-  color: var(--ink);
-  margin: 0 0 12px;
-}
-.noscript-fallback p { margin: 0 0 10px; }
-
 /* ===== Print ===== */
 @media print {
   /* Reveal-on-scroll content the reader never scrolled past would otherwise
