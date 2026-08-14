@@ -304,7 +304,9 @@ h1, h2, h3, h4 { font-family: var(--font-serif); }
 }
 .mobile-link:hover,
 .mobile-sub-trigger:hover { color: var(--accent-hover); background: var(--cream); }
-.mobile-link.active { color: var(--accent); }
+.mobile-link.active,
+.mobile-sub-trigger.active,
+.mobile-sub a.active { color: var(--accent); }
 .mobile-sub-trigger .chev { transition: transform var(--transition); }
 .mobile-sub-trigger[aria-expanded="true"] .chev { transform: rotate(180deg); }
 .mobile-sub {

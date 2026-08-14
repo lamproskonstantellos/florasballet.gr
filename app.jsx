@@ -7,7 +7,26 @@
 
 const { useState, useEffect, useCallback, useRef } = React;
 
-const HEADER_OFFSET = 100;
+// The sticky header's height varies with the breakpoint (logo + padding), so
+// measure it at scroll time instead of hard-coding a constant that drifts.
+const HEADER_GAP = 12;
+function headerOffset() {
+  const header = typeof document !== "undefined" && document.querySelector(".site-header");
+  return (header ? header.offsetHeight : 116) + HEADER_GAP;
+}
+
+// Honour prefers-reduced-motion for programmatic scrolling: an explicit
+// `behavior` in ScrollToOptions overrides the CSS scroll-behavior, so the media
+// query must be checked here too.
+function scrollBehavior() {
+  return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ? "auto"
+    : "smooth";
+}
+
+function hoverCapable() {
+  return !!(window.matchMedia && window.matchMedia("(hover: hover)").matches);
+}
 
 /* ============================================================
    HEADER — sticky, translucent, with the «Η Σχολή» dropdown and
@@ -20,6 +39,7 @@ function Header({ route, navigate, activeSection }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSubOpen, setMobileSubOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const dropdownTriggerRef = useRef(null);
   const mobileRef = useRef(null);
   const toggleRef = useRef(null);
 
@@ -33,7 +53,13 @@ function Header({ route, navigate, activeSection }) {
     const onDoc = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setDropdownOpen(false);
     };
-    const onKey = (e) => { if (e.key === "Escape") setDropdownOpen(false); };
+    const onKey = (e) => {
+      if (e.key !== "Escape") return;
+      setDropdownOpen(false);
+      // Return focus to the trigger — otherwise it lands on the now-hidden menu
+      // item and the browser drops it to <body>, restarting Tab from the top.
+      if (dropdownTriggerRef.current) dropdownTriggerRef.current.focus();
+    };
     document.addEventListener("mousedown", onDoc);
     document.addEventListener("keydown", onKey);
     return () => {
@@ -69,6 +95,21 @@ function Header({ route, navigate, activeSection }) {
     };
   }, [mobileOpen]);
 
+  // Close the mobile panel when the viewport widens past the breakpoint where
+  // the desktop nav returns — otherwise a fixed drawer + backdrop (with body
+  // scroll still locked) is left over the desktop layout, its toggle now hidden.
+  useEffect(() => {
+    if (!mobileOpen || !window.matchMedia) return;
+    const mq = window.matchMedia("(min-width: 821px)");
+    const onChange = () => { if (mq.matches) setMobileOpen(false); };
+    if (mq.addEventListener) mq.addEventListener("change", onChange);
+    else if (mq.addListener) mq.addListener(onChange);
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener("change", onChange);
+      else if (mq.removeListener) mq.removeListener(onChange);
+    };
+  }, [mobileOpen]);
+
   const go = (e, target) => {
     handleAnchorClick(e, navigate, target);
     setDropdownOpen(false);
@@ -101,21 +142,20 @@ function Header({ route, navigate, activeSection }) {
             className={"nav-dropdown" + (schoolActive ? " active" : "")}
             ref={dropdownRef}
             data-open={dropdownOpen ? "true" : "false"}
-            onMouseEnter={() => setDropdownOpen(true)}
-            onMouseLeave={() => setDropdownOpen(false)}
+            onMouseEnter={() => { if (hoverCapable()) setDropdownOpen(true); }}
+            onMouseLeave={() => { if (hoverCapable()) setDropdownOpen(false); }}
           >
             <button
               type="button"
               className="nav-dropdown-trigger"
-              aria-haspopup="true"
+              ref={dropdownTriggerRef}
               aria-expanded={dropdownOpen ? "true" : "false"}
               onClick={() => setDropdownOpen((o) => !o)}
             >
               Η Σχολή <Icon.chevron className="chev" style={{ width: 13, height: 13 }} />
             </button>
-            <div className="dropdown-menu" role="menu">
+            <div className="dropdown-menu">
               <a
-                role="menuitem"
                 className={route.page === "school" ? "active" : ""}
                 href={routeToPath(ABOUT)}
                 onClick={(e) => go(e, ABOUT)}
@@ -123,7 +163,6 @@ function Header({ route, navigate, activeSection }) {
                 Εμείς
               </a>
               <a
-                role="menuitem"
                 className={route.page === "teachers" ? "active" : ""}
                 href={routeToPath(TEACH)}
                 onClick={(e) => go(e, TEACH)}
@@ -204,23 +243,25 @@ function Header({ route, navigate, activeSection }) {
               </button>
             </div>
 
-            <button
-              type="button"
-              className="mobile-sub-trigger"
-              aria-expanded={mobileSubOpen ? "true" : "false"}
-              onClick={() => setMobileSubOpen((o) => !o)}
-            >
-              Η Σχολή <Icon.chevron className="chev" style={{ width: 15, height: 15 }} />
-            </button>
-            <div className={"mobile-sub" + (mobileSubOpen ? " open" : "")}>
-              <a href={routeToPath(ABOUT)} onClick={(e) => go(e, ABOUT)}>Εμείς</a>
-              <a href={routeToPath(TEACH)} onClick={(e) => go(e, TEACH)}>Διδάσκοντες</a>
-            </div>
+            <nav aria-label="Κύρια πλοήγηση">
+              <button
+                type="button"
+                className={"mobile-sub-trigger" + (schoolActive ? " active" : "")}
+                aria-expanded={mobileSubOpen ? "true" : "false"}
+                onClick={() => setMobileSubOpen((o) => !o)}
+              >
+                Η Σχολή <Icon.chevron className="chev" style={{ width: 15, height: 15 }} />
+              </button>
+              <div className={"mobile-sub" + (mobileSubOpen ? " open" : "")}>
+                <a className={route.page === "school" ? "active" : ""} href={routeToPath(ABOUT)} onClick={(e) => go(e, ABOUT)}>Εμείς</a>
+                <a className={route.page === "teachers" ? "active" : ""} href={routeToPath(TEACH)} onClick={(e) => go(e, TEACH)}>Διδάσκοντες</a>
+              </div>
 
-            <a className="mobile-link" href={routeToPath(MATH)} onClick={(e) => go(e, MATH)}>Μαθήματα</a>
-            <a className="mobile-link" href={routeToPath(COMP)} onClick={(e) => go(e, COMP)}>Διαγωνισμοί</a>
-            <a className="mobile-link" href={routeToPath(NEWS)} onClick={(e) => go(e, NEWS)}>Νέα &amp; Ανακοινώσεις</a>
-            <a className="mobile-cta" href={routeToPath(CONTACT)} onClick={(e) => go(e, CONTACT)}>Επικοινωνία</a>
+              <a className={"mobile-link" + (onHome && activeSection === "mathimata" ? " active" : "")} href={routeToPath(MATH)} onClick={(e) => go(e, MATH)}>Μαθήματα</a>
+              <a className={"mobile-link" + (route.page === "competitions" ? " active" : "")} href={routeToPath(COMP)} onClick={(e) => go(e, COMP)}>Διαγωνισμοί</a>
+              <a className={"mobile-link" + ((onHome && activeSection === "nea") || newsActive ? " active" : "")} href={routeToPath(NEWS)} onClick={(e) => go(e, NEWS)}>Νέα &amp; Ανακοινώσεις</a>
+              <a className="mobile-cta" href={routeToPath(CONTACT)} onClick={(e) => go(e, CONTACT)}>Επικοινωνία</a>
+            </nav>
           </div>
         </>
       )}
@@ -301,6 +342,10 @@ function HomePage({ navigate }) {
    ============================================================ */
 
 function ContactPage() {
+  // Reset scroll on mount like every other route component: the «Επικοινωνία»
+  // control is reachable from any scroll depth, and without this the shorter
+  // contact page keeps the old scrollY and lands the viewport at the footer.
+  useEffect(() => { window.scrollTo({ top: 0 }); }, []);
   return (
     <div className="page contact-page">
       <Contact />
@@ -313,6 +358,7 @@ function ContactPage() {
    ============================================================ */
 
 function NotFound({ navigate }) {
+  useEffect(() => { window.scrollTo({ top: 0 }); }, []);
   return (
     <div className="page notfound">
       <div className="notfound-code" aria-hidden="true">404</div>
@@ -419,8 +465,8 @@ function App() {
     requestAnimationFrame(() => {
       const el = document.getElementById(id);
       if (el) {
-        const y = el.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET;
-        window.scrollTo({ top: y, behavior: "smooth" });
+        const y = el.getBoundingClientRect().top + window.scrollY - headerOffset();
+        window.scrollTo({ top: y, behavior: scrollBehavior() });
       }
     });
   }, []);
@@ -435,8 +481,12 @@ function App() {
   useEffect(() => {
     if (route.page !== "home") { hashSyncArmed.current = false; return; }
     if (!hashSyncArmed.current) { hashSyncArmed.current = true; return; }
-    const targetUrl = "/" + (activeSection ? "#" + activeSection : "");
-    if (window.location.pathname + window.location.hash !== targetUrl) {
+    // Preserve any query string (?utm_source, ?fbclid) — rebuilding the URL from
+    // pathname + hash alone would erase it on the first scroll-spy update, before
+    // anything could read it.
+    const search = window.location.search;
+    const targetUrl = "/" + search + (activeSection ? "#" + activeSection : "");
+    if (window.location.pathname + window.location.search + window.location.hash !== targetUrl) {
       window.history.replaceState(window.history.state, "", targetUrl);
     }
   }, [route.page, activeSection]);
@@ -461,12 +511,12 @@ function App() {
       requestAnimationFrame(() => {
         const el = document.getElementById(next.section);
         if (el) {
-          const y = el.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET;
-          window.scrollTo({ top: y, behavior: "smooth" });
+          const y = el.getBoundingClientRect().top + window.scrollY - headerOffset();
+          window.scrollTo({ top: y, behavior: scrollBehavior() });
         }
       });
     } else if (next.page === "home" && !next.section) {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: scrollBehavior() });
     }
   }, []);
 

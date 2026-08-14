@@ -78,8 +78,10 @@ test("compiled app bundle carries the title + focus wiring", () => {
 test("Header wires the «Η Σχολή» dropdown and the mobile menu (a11y attrs)", () => {
   const src = fs.readFileSync(path.join(ROOT, "app.jsx"), "utf8");
   assert.ok(src.includes("nav-dropdown"), "desktop dropdown missing");
-  assert.match(src, /aria-haspopup="true"/, "dropdown needs aria-haspopup");
   assert.match(src, /aria-expanded=\{dropdownOpen/, "dropdown needs aria-expanded");
+  // The dropdown is a disclosure of plain links, not an ARIA menu: it must not
+  // claim role="menu"/menuitem (which promise arrow-key navigation it lacks).
+  assert.ok(!/role="menu(item)?"/.test(src), "dropdown must not fake ARIA menu semantics");
   assert.ok(src.includes("nav-toggle"), "hamburger toggle missing");
   assert.ok(src.includes("mobile-menu"), "mobile panel missing");
   assert.match(src, /role="dialog"[\s\S]{0,40}aria-modal="true"/, "mobile panel must be a modal dialog");
