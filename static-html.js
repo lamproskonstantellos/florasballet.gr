@@ -12,8 +12,9 @@
    The React app boots afterwards and replaces this content with
    the interactive tree (ReactDOM render() clears the container),
    so the static markup mirrors the app's structure and reuses its
-   CSS classes; image URLs point at the same .avif variants the
-   <Picture> component loads, so nothing is fetched twice.
+   CSS classes; images use the same three-candidate <picture>
+   element the <Picture> component renders, so the browser picks
+   the identical URL in both worlds and nothing is fetched twice.
 
    Node-only (require), like feeds.js / server.js.
    ============================================================ */
@@ -39,12 +40,29 @@ function inline(text) {
   return escapeHtml(text).replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
 }
 
-// Site-root path for an asset, preferring the .avif sibling the <Picture>
-// component will load anyway — same URL, so the browser cache is shared and
-// nothing downloads twice once the app boots.
-function avif(assetPath) {
+// The same three-candidate <picture> element the React <Picture> component
+// renders (AVIF → WebP → original), so the static markup degrades identically:
+// a browser without AVIF gets the WebP/original fallback instead of a broken
+// image, the chosen URL matches what the app loads (shared cache, no double
+// download), and if the optimize-images step ever skipped, the committed
+// original still renders. `loading` defaults to lazy — only the LCP hero
+// should pass "eager".
+function pictureHtml(assetPath, { alt, width, height, loading = "lazy" }) {
   const p = assetPath.startsWith("/") ? assetPath : "/" + assetPath;
-  return p.replace(/\.(jpe?g|png)$/i, ".avif");
+  const attrs =
+    `alt="${escapeHtml(alt || "")}" width="${width}" height="${height}"` +
+    ` loading="${loading}" decoding="async" style="max-width:100%;height:auto"`;
+  if (!/\.(jpe?g|png)$/i.test(p)) {
+    return `<img src="${escapeHtml(p)}" ${attrs} />`;
+  }
+  const base = p.replace(/\.(jpe?g|png)$/i, "");
+  return (
+    `<picture>` +
+    `<source srcset="${escapeHtml(base)}.avif" type="image/avif" />` +
+    `<source srcset="${escapeHtml(base)}.webp" type="image/webp" />` +
+    `<img src="${escapeHtml(p)}" ${attrs} />` +
+    `</picture>`
+  );
 }
 
 // Evaluate data.js (a browser-global file) with a fake window, exactly like
@@ -131,7 +149,7 @@ function homeMain(data, siteCfg, articles) {
   const preview = articles.slice(0, data.LIMITS.newsPreview);
   return (
     `<div class="page">` +
-    `<img src="${escapeHtml(avif(hero))}" alt="Φωτογραφία από παράσταση της σχολής" width="1600" height="900" style="max-width:100%;height:auto" />` +
+    pictureHtml(hero, { alt: "Φωτογραφία από παράσταση της σχολής", width: 1600, height: 900, loading: "eager" }) +
     `<div class="home-intro">` +
     `<p class="home-eyebrow">40 χρόνια ρυθμός, κίνηση &amp; αγάπη για τον χορό</p>` +
     `<h1>${escapeHtml(data.SCHOOL.h1 || siteCfg.name)}</h1>` +
@@ -143,7 +161,7 @@ function homeMain(data, siteCfg, articles) {
     `<section id="mathimata"><h2>Τα μαθήματα</h2>` +
     data.COURSES.map((c) =>
       `<article><h3>${escapeHtml(c.title)}</h3>` +
-      `<img src="${escapeHtml(avif(c.image))}" alt="${escapeHtml(c.alt)}" width="1400" height="875" style="max-width:100%;height:auto" />` +
+      pictureHtml(c.image, { alt: c.alt, width: 1400, height: 875 }) +
       `<p>${inline(c.desc)}</p></article>`
     ).join("") +
     `</section>` +
@@ -181,7 +199,7 @@ function teachersMain(data) {
       `<article class="teacher-card"><div>` +
       `<h2>${escapeHtml(t.name)}</h2>` +
       `<p>${escapeHtml(t.role)}</p>` +
-      `<img src="${escapeHtml(avif(t.image))}" alt="${escapeHtml(t.alt)}" width="1072" height="1500" style="max-width:360px;height:auto" />` +
+      pictureHtml(t.image, { alt: t.alt, width: 1072, height: 1500 }) +
       (t.bio || []).map((p) => `<p>${inline(p)}</p>`).join("") +
       (t.highlights && t.highlights.length
         ? `<h3>${escapeHtml(t.highlightsTitle || "Διακρίσεις")}</h3><ul>` +
@@ -231,7 +249,7 @@ function articleMain(article) {
     `<p class="article-meta"><time datetime="${escapeHtml(article.date)}">${escapeHtml(article.dateLabel)}</time>${article.location ? " — " + escapeHtml(article.location) : ""}</p>` +
     `<h1>${escapeHtml(article.title)}</h1>` +
     (article.cover
-      ? `<img src="${escapeHtml(avif(article.cover))}" alt="" width="1280" height="720" style="max-width:100%;height:auto" />`
+      ? pictureHtml(article.cover, { alt: "", width: 1280, height: 720, loading: "eager" })
       : "") +
     `<div class="article-body">` +
     (article.body || []).map((p) => `<p>${inline(p)}</p>`).join("") +
@@ -241,7 +259,7 @@ function articleMain(article) {
         article.photos.map((ph, i) => {
           const src = typeof ph === "string" ? ph : ph.src;
           const alt = (typeof ph === "object" && ph.alt) || `Φωτογραφία ${i + 1} από «${article.title}»`;
-          return `<img src="${escapeHtml(avif(src))}" alt="${escapeHtml(alt)}" width="800" height="600" loading="lazy" style="max-width:100%;height:auto" />`;
+          return pictureHtml(src, { alt, width: 800, height: 600 });
         }).join("") +
         `</div>`
       : "") +
